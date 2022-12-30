@@ -10,7 +10,7 @@ public class test_2156 {
 		
 		//설명
 		//oox : dp[i-1] - 이전의 제일 큰 값
-		//xoo : wines[i]+wines[i-1]+dp[i-3]
+		//xoo : wines[i]+wines[i-1]+dp[i-3](xoo 이전의 제일 큰 값)
 		//oxo : wine[i]+dp[i-2]
 		
 		//input
