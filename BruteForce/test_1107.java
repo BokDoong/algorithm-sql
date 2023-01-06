@@ -11,34 +11,35 @@ public class test_1107 {
 		
 		//input
 		int target = Integer.parseInt(br.readLine());
-		int cnt = Integer.parseInt(br.readLine());
+		int n = Integer.parseInt(br.readLine());
+		
 		boolean[] broken = new boolean[10];
-
-		StringTokenizer st = new StringTokenizer(br.readLine());
-		for(int i=0; i<cnt; i++)
-			broken[Integer.parseInt(st.nextToken())] = true;
-			
+		if(n!=0) {
+			StringTokenizer st = new StringTokenizer(br.readLine());
+			for(int i=0; i<n; i++) {
+				int btn = Integer.parseInt(st.nextToken());
+				broken[btn] = true;
+			}
+		}
+		
 		//main
-		int result = Math.abs(target - 100);
-		//10으로 나누고 나머지를 구해 고장난버튼인지 검사
+		int result = Math.abs(target-100);
 		for(int i=0; i<1000000; i++) {
-			String str = String.valueOf(i);
+			String btn = String.valueOf(i);
 			
-			boolean isBreak = false;
-			for(int j=0; j<str.length(); j++) {
-				if(broken[str.charAt(j) - '0']) {
-					isBreak = true;
+			boolean check = true;
+			int len = btn.length();
+			for(int j=0; j<len; j++) {
+				if(broken[btn.charAt(j)-'0']) {
+					check = false;
 					break;
 				}
 			}
-			
-			if(!isBreak) {
-				int min = Math.abs(target - i) + str.length();
-				result = Math.min(min, result);
-			}
+			if(check)
+				result = Math.min(result, Math.abs(target-i)+len);
 		}
 		
 		//output
 		System.out.println(result);
-	}
+	}	
 }
