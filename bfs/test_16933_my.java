@@ -1,116 +1,99 @@
 package BaekJoon_Study.bfs;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.StringTokenizer;
+import java.util.Scanner;
 
 
 public class test_16933_my {
 
+    static int N, M , K;
+    static int[][] map;
+    static int[] dx = {1, 0, -1, 0};
+    static int[] dy = {0, 1, 0, -1};
+
     static class Node{
-        int y;
-        int x;
-        int drill;
-        int count;
-        boolean afternoon;
-        Node(int y,int x,int drill,int count,boolean afternoon){
-            this.y=y;
-            this.x=x;
-            this.drill=drill;
-            this.count=count;
-            this.afternoon=afternoon;
+        int x, y, cnt, breakWall;
+        boolean time;
+
+        //time: true-낮, false-밤
+        public Node(int x, int y, int cnt, int breakWall, boolean time) {
+            this.x = x;
+            this.y = y;
+            this.cnt = cnt;
+            this.breakWall = breakWall;
+            this.time = time;
         }
     }
 
-    static int max;
-    static char map[][];
-    static int xx[]= {-1,1,0,0};
-    static int yy[]= {0,0,-1,1};
-    static StringBuilder sb=new StringBuilder();
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st;
+    public static void main(String[] args) {
+        //input
+        Scanner sc = new Scanner(System.in);
+        N = sc.nextInt(); M = sc.nextInt(); K = sc.nextInt();
 
-        st=new StringTokenizer(br.readLine());
-        int n=Integer.parseInt(st.nextToken());
-        int m=Integer.parseInt(st.nextToken());
-        max=Integer.parseInt(st.nextToken());
-        map=new char[n][m];
-
-        for(int i=0;i<n;i++) {
-            String line=br.readLine();
-            for(int j=0;j<m;j++) {
-                map[i][j]=line.charAt(j);
+        map = new int[N][M];
+        sc.nextLine();
+        for (int i = 0; i < N; i++) {
+            String input = sc.nextLine();
+            for (int j = 0; j < M; j++) {
+                map[i][j] = input.charAt(j) - '0';
             }
         }
 
-        bfs();
+        //output
+        System.out.println(bfs(new Node(0, 0, 1, 0, true)));
     }
 
-    public static void bfs() {
-        boolean visited[][][]=new boolean[map.length][map[0].length][max+1];
+    static int bfs(Node node) {
+        Queue<Node> queue = new LinkedList<>();
+        queue.add(node);
 
-        visited[0][0][0]=true;
+        boolean[][][] visited = new boolean[N][M][K + 1];
+        while (!queue.isEmpty()) {
+            Node now = queue.poll();
+            int prevX = now.x;
+            int prevY = now.y;
+            int breakWall = now.breakWall;
+            int cnt = now.cnt;
+            boolean time = now.time;
+            boolean reverse = !time;
 
-        Queue<Node> queue=new LinkedList<>();
-        queue.add(new Node(0,0,0,1,true));
-        while(!queue.isEmpty()) {
-            Node temp=queue.poll();
-            int prevY=temp.y;
-            int prevX=temp.x;
-            int drill=temp.drill;
-            int count=temp.count;
-            boolean afternoon=temp.afternoon;
-            if(prevY==map.length-1&&prevX==map[0].length-1) {
-                System.out.println(count);
-                return;
-            }
-            for(int i=0;i<xx.length;i++) {
-                int nextY=prevY+yy[i];
-                int nextX=prevX+xx[i];
+            if (now.x == N - 1 && now.y == M - 1)
+                return cnt;
 
-                if(nextY<0||nextX<0||nextY>=map.length||nextX>=map[0].length) continue;
+            for (int i = 0; i < 4; i++) {
+                int nextX = prevX + dx[i];
+                int nextY = prevY + dy[i];
 
-                //낮과 밤이 반전된 형태
-                boolean reverse=!afternoon;
+                if (nextX < 0 || nextY < 0 || nextX >= N || nextY >= M)
+                    continue;
 
-                //빈칸이라면
-                if(map[nextY][nextX]=='0') {
-                    //방문한 적이 없다면
-                    if(visited[nextY][nextX][drill]==false) {
-                        //count 를 1 증가시키고, 낮과 밤을 반전시켜서 queue에 add
-                        queue.add(new Node(nextY,nextX,drill,count+1,reverse));
-                        visited[nextY][nextX][drill]=true;  //방문처리
+                //벽o
+                if (map[nextX][nextY] == 1) {
+                    //밤이면 - 벽을 부술 수 있으면 가만히있기
+                    //방문처리 x - 낮으로 돌아가서 그때 처리해야 정확히 나옴(이동하는 것은 낮이기 때문)
+                    if (now.breakWall < K && now.time == false) {
+                        queue.add(new Node(prevX, prevY, cnt + 1, breakWall, reverse));
+                    }
+                    //낮이면 - 벽 부술수 있고 다음꺼 방문 안되어있으면 부수기
+                    if (now.breakWall < K && now.time == true && !visited[nextX][nextY][now.breakWall+1]) {
+                        visited[nextX][nextY][now.breakWall+1] = true;
+                        queue.add(new Node(nextX, nextY, cnt + 1, breakWall + 1, reverse));
                     }
                 }
-                //벽이라면
+                //벽x - 그냥 가면됨
                 else {
-                    //벽을 한 번 더 부술 수 있고 낮이라면
-                    if(drill+1<=max&&afternoon) {
-                        //방문하지 않았다면
-                        if(visited[nextY][nextX][drill+1]==false) {
-                            //벽을 부수고, count를 1 증가시키고 낮과 밤을 반전시켜서 queue에 add
-                            queue.add(new Node(nextY,nextX,drill+1,count+1,reverse));
-                            //방문처리
-                            visited[nextY][nextX][drill+1]=true;
-                        }
-                    }
-                    //벽을 한 번 더 부술 수 있고 밤이라면
-                    else if(drill+1<=max&&!afternoon) {
-                        // 그냥 현재 좌표를 다시 한 번 queue에 add. 낮과 밤은 반전, count 증가.
-                        queue.add(new Node(prevY,prevX,drill,count+1,reverse));
-
+                    //만약 방문 안했으면
+                    if (!visited[nextX][nextY][breakWall]) {
+                        visited[nextX][nextY][now.breakWall] = true;
+                        queue.add(new Node(nextX, nextY, cnt+1, breakWall, reverse));
                     }
                 }
-
-
-
             }
         }
-        System.out.println(-1);
+
+        return -1;
     }
 }
+
 
