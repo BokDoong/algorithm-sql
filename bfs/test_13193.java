@@ -10,49 +10,9 @@ public class test_13193 {
     static int N, K;
     static int[] visited;
     static int[] parent;
-    static Queue<Integer> queue;
-
-    static int bfs(int now){
-        queue.offer(now);
-
-        while (!queue.isEmpty()) {
-            int num = queue.poll();
-            int next;
-
-            if (num == K) {
-                return visited[num];
-            }
-
-            //+1
-            next = num+1;
-            if(next <= 100000 && visited[next] == 0) {
-                visited[next] = visited[num] + 1;
-                parent[next] = num;
-                queue.add(next);
-            }
-
-            //-1
-            next = num-1;
-            if(next >= 0 &&visited[next] == 0) {
-                visited[next] = visited[num] + 1;
-                parent[next] = num;
-                queue.add(next);
-            }
-
-            //*2
-            next = num*2;
-            if(next <= 100000 && visited[next] == 0) {
-                visited[next] = visited[num]+1;
-                parent[next] = num;
-                queue.add(next);
-            }
-        }
-
-        return -1;
-    }
+    static StringBuilder sb = new StringBuilder();
 
     public static void main(String[] args) {
-
         //input
         Scanner sc = new Scanner(System.in);
         N = sc.nextInt();
@@ -61,21 +21,47 @@ public class test_13193 {
         //main
         visited = new int[100001];
         parent = new int[100001];
-        queue = new LinkedList<>();
+        bfs();
 
         //output
-        System.out.println(bfs(N));
-
         Stack<Integer> stack = new Stack<>();
-        stack.add(K);
-        int index = K;
-        while (index != N) {
-            stack.push(parent[index]);
-            index = parent[index];
+        stack.push(K);
+        int order = K; //17
+        while (order != N) {
+            stack.push(parent[order]);
+            order = parent[order];
         }
 
+        System.out.println(visited[K]);
         while (!stack.isEmpty()) {
             System.out.print(stack.pop() + " ");
+        }
+    }
+
+    static void bfs() {
+        Queue<Integer> queue = new LinkedList<>();
+        queue.add(N);
+
+        while (!queue.isEmpty()) {
+            int now = queue.poll();
+
+            if (now + 1 < 100001 && visited[now + 1] == 0) {
+                queue.add(now + 1);
+                parent[now + 1] = now;
+                visited[now+1] = visited[now]+1;
+            }
+
+            if (now - 1 >= 0 && visited[now - 1] == 0) {
+                queue.add(now - 1);
+                parent[now - 1] = now;
+                visited[now-1] = visited[now]+1;
+            }
+
+            if (now*2 < 100001 && visited[now*2] == 0) {
+                queue.add(now*2);
+                parent[now*2] = now;
+                visited[now*2] = visited[now] + 1;
+            }
         }
     }
 }
