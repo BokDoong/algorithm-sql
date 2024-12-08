@@ -1,5 +1,4 @@
--- 코드를 입력하세요
-SELECT mp.member_id, mp.member_name, mp.gender, DATE_FORMAT(mp.date_of_birth, '%Y-%m-%d')
-FROM member_profile AS mp
-WHERE MONTH(mp.date_of_birth) = 3 AND mp.tlno IS NOT NULL AND mp.gender = 'W'
-ORDER BY mp.member_id
+SELECT member_id, member_name, gender, DATE_FORMAT(date_of_birth, '%Y-%m-%d') AS DATE_OF_BIRTH
+FROM member_profile
+WHERE tlno IS NOT NULL AND gender = "W" AND MONTH(date_of_birth) = 3
+ORDER BY member_id
