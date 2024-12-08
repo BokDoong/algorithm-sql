@@ -1,5 +1,4 @@
--- 코드를 작성해주세요
-SELECT count(*) AS FISH_COUNT
+SELECT COUNT(*) AS FISH_COUNT
 FROM fish_info
     INNER JOIN fish_name_info
     ON fish_info.fish_type = fish_name_info.fish_type
