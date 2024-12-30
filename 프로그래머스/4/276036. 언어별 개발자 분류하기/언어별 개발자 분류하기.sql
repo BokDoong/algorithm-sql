@@ -1,13 +1,12 @@
-SELECT
-    CASE
-     WHEN (SKILL_CODE & (SELECT SUM(CODE) FROM SKILLCODES WHERE CATEGORY LIKE 'FRONT%')) 
-          AND SKILL_CODE & (SELECT CODE FROM SKILLCODES WHERE NAME = 'PYTHON') THEN 'A'
-     WHEN SKILL_CODE & (SELECT CODE FROM SKILLCODES WHERE NAME = 'C#') THEN 'B'
-     WHEN SKILL_CODE & (SELECT SUM(CODE) FROM SKILLCODES WHERE CATEGORY LIKE 'FRONT%') THEN 'C'
-    ELSE NULL
-    END AS GRADE
-,ID, EMAIL
-FROM DEVELOPERS
-GROUP BY GRADE, ID, EMAIL
-HAVING GRADE IS NOT NULL
-ORDER BY GRADE, ID
+select
+    case
+        when SKILL_CODE & (select sum(CODE) from SKILLCODES where CATEGORY like 'Front%') > 0 and SKILL_CODE & (select CODE from SKILLCODES where NAME = 'Python') > 0 then 'A'
+        when SKILL_CODE & (select CODE from SKILLCODES where NAME = 'C#') > 0 then 'B'
+        when SKILL_CODE & (select sum(CODE) from SKILLCODES where CATEGORY like 'Front%') > 0 then 'C'
+        else null
+    end as GRADE,
+    ID, EMAIL
+from DEVELOPERS
+group by GRADE, ID, EMAIL
+having GRADE is not null
+order by GRADE, ID
