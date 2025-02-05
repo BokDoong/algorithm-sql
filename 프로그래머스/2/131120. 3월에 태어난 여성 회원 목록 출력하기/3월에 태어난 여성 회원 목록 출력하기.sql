@@ -1,4 +1,4 @@
-SELECT member_id, member_name, gender, DATE_FORMAT(date_of_birth, '%Y-%m-%d') AS DATE_OF_BIRTH
-FROM member_profile
-WHERE tlno IS NOT NULL AND gender = "W" AND MONTH(date_of_birth) = 3
-ORDER BY member_id
+select MEMBER_ID, MEMBER_NAME, GENDER, date_format(DATE_OF_BIRTH, '%Y-%m-%d') as DATE_OF_BIRTH
+from MEMBER_PROFILE
+where GENDER = 'W' and TLNO is not null and month(DATE_OF_BIRTH) = 3
+order by MEMBER_ID
