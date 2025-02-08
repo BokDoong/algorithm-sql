@@ -1,6 +1,5 @@
--- 코드를 작성해주세요
-SELECT id, email, first_name, last_name
-FROM developers
-WHERE skill_code & (SELECT code FROM skillcodes WHERE name = 'Python')
-    OR skill_code & (SELECT code FROM skillcodes WHERE name = 'C#')
-ORDER BY id
+select distinct ID, EMAIL, FIRST_NAME, LAST_NAME
+from DEVELOPERS
+    inner join SKILLCODES on DEVELOPERS.SKILL_CODE & SKILLCODES.CODE > 0
+where SKILLCODES.NAME = 'Python' or SKILLCODES.NAME = 'C#'
+order by ID
