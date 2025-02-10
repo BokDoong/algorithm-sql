@@ -1,8 +1,8 @@
--- 코드를 작성해주세요
-select id,
+select ID, 
     case
-        when (size_of_colony <= 100) then "LOW"
-        when (size_of_colony <= 1000) then "MEDIUM"
-        else "HIGH"
-    end "SIZE"
-from ecoli_data
+        when SIZE_OF_COLONY > 1000 then 'HIGH'
+        when SIZE_OF_COLONY > 100 then 'MEDIUM'
+        else 'LOW'
+    end as SIZE
+from ECOLI_DATA
+order by ID
