@@ -1,9 +1,14 @@
-select ID, 
+with RANKS_INFO as (
+    select ID, SIZE_OF_COLONY, ntile(4) over(order by SIZE_OF_COLONY desc) SIZE_RANKS
+    from ECOLI_DATA
+)
+
+select ID,
     case
-        when percent_rank() over(order by size_of_colony desc) <= 0.25 then 'CRITICAL'
-        when percent_rank() over(order by size_of_colony desc) <= 0.5 then 'HIGH'
-        when percent_rank() over(order by size_of_colony desc) <= 0.75 then 'MEDIUM'
+        when SIZE_RANKS = 1 then 'CRITICAL'
+        when SIZE_RANKS = 2 then 'HIGH'
+        when SIZE_RANKS = 3 then 'MEDIUM'
         else 'LOW'
-    end 'COLONY_NAME'
-from ecoli_data
+    end as COLONY_NAME
+from RANKS_INFO
 order by ID
