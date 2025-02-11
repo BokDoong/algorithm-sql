@@ -1,7 +1,5 @@
--- 코드를 작성해주세요
-SELECT s.id, s.genotype, p.genotype AS PARENT_GENOTYPE
-FROM ecoli_data AS s
-    INNER JOIN ecoli_data AS p
-    ON s.parent_id = p.id
-WHERE p.genotype & s.genotype >= p.genotype
-ORDER BY s.id
+select SON.ID, SON.GENOTYPE, PARENT.GENOTYPE as PARENT_GENOTYPE
+from ECOLI_DATA as SON
+    inner join ECOLI_DATA as PARENT on SON.PARENT_ID = PARENT.ID
+where SON.GENOTYPE & PARENT.GENOTYPE >= PARENT.GENOTYPE
+order by SON.ID
