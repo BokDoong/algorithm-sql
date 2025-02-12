@@ -1,11 +1,20 @@
-select ID
-from ecoli_data
-where parent_id in (
-    select id as SECOND_GEN_ID
-    from ecoli_data
-    where parent_id in (
-        select id as FIRST_GEN_ID
-        from ecoli_data
-        where parent_id is null
+with FIRST_GEN as (
+    select *
+    from ECOLI_DATA
+    where PARENT_ID is null
+), SECOND_GEN as (
+    select *
+    from ECOLI_DATA
+    where PARENT_ID in (
+        select ID
+        from FIRST_GEN
     )
 )
+
+select ID
+from ECOLI_DATA
+where PARENT_ID in  (
+    select ID
+    from SECOND_GEN
+)
+order by ID asc
