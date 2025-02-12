@@ -1,19 +1,24 @@
-# 세대별 대장균, 전 세대의 부모 대장균 정보
-with recursive generation_infos as (
-    # 1세대
-    select 1 as generation, id, parent_id
-    from ecoli_data
-    where parent_id is null
-    
+# 재귀쿼리 -> 세대 정보
+with recursive GEN_INFO as (
+    # 초기 테이블
+    select ID, PARENT_ID, 1 as GENERATION
+    from ECOLI_DATA
+    where PARENT_ID is null
+    # 재귀 테이블
     union all
-    
-    # 다음 세대
-    select generation_infos.generation + 1, ecoli_data.id, ecoli_data.parent_id
-    from ecoli_data
-    join generation_infos on generation_infos.id = ecoli_data.parent_id
+    select RE.ID, RE.PARENT_ID, GEN_INFO.GENERATION+1
+    from GEN_INFO
+        inner join ECOLI_DATA as RE on GEN_INFO.ID = RE.PARENT_ID
+), PARENT_SON_INFO as (
+    select PARENT_ID, count(*) as CHILD_COUNT
+    from ECOLI_DATA
+    group by PARENT_ID
+        having PARENT_ID is not null
 )
+
 select count(*) as COUNT, GENERATION
-from generation_infos
-where id not in (select parent_id from generation_infos where parent_id is not null)
-group by generation
-order by generation
+from GEN_INFO
+    left join PARENT_SON_INFO on GEN_INFO.ID = PARENT_SON_INFO.PARENT_ID
+where CHILD_COUNT is null
+group by GENERATION
+order by GENERATION
