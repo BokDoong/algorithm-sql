@@ -1,3 +1,4 @@
 select *
-from food_product
-where price = (select max(price) from food_product)
+from FOOD_PRODUCT
+order by PRICE desc
+limit 1
