@@ -1,3 +1,3 @@
-select sum(price) as TOTAL_PRICE
-from item_info
-where rarity = 'LEGEND'
+select sum(PRICE) as TOTAL_PRICE
+from ITEM_INFO
+where RARITY = 'LEGEND'
