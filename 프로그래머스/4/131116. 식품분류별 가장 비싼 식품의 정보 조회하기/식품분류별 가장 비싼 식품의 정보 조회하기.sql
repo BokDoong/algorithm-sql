@@ -1,11 +1,11 @@
-with CATEGORY_MAX_PRICES as (
+with 카테고리별_최대가격 as (
     select CATEGORY, max(PRICE) as MAX_PRICE
     from FOOD_PRODUCT
-        where CATEGORY like '국' or CATEGORY like '김치' or CATEGORY like '식용유' or CATEGORY like '과자'
     group by CATEGORY
 )
 
-select FP.CATEGORY, CM.MAX_PRICE, FP.PRODUCT_NAME
-from FOOD_PRODUCT as FP
-    inner join CATEGORY_MAX_PRICES as CM on FP.PRICE = CM.MAX_PRICE and FP.CATEGORY = CM.CATEGORY
-order by PRICE desc
+select FOOD_PRODUCT.CATEGORY, MAX_PRICE, PRODUCT_NAME
+from FOOD_PRODUCT
+    inner join 카테고리별_최대가격 on FOOD_PRODUCT.CATEGORY = 카테고리별_최대가격.CATEGORY
+where PRICE = MAX_PRICE and (FOOD_PRODUCT.CATEGORY = '과자' or FOOD_PRODUCT.CATEGORY = '국' or FOOD_PRODUCT.CATEGORY = '김치' or FOOD_PRODUCT.CATEGORY = '식용유')
+order by MAX_PRICE desc
