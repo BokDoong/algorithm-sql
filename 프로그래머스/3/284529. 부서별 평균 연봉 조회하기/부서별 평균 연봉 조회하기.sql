@@ -1,5 +1,5 @@
-select dept.DEPT_ID, DEPT_NAME_EN, round(avg(SAL), 0) as AVG_SAL
-from hr_department as dept
-inner join hr_employees as em on dept.dept_id = em.dept_id
-group by dept.dept_id
+select HR_DEPARTMENT.DEPT_ID, DEPT_NAME_EN, round(avg(SAL),0) as AVG_SAL
+from HR_EMPLOYEES
+    inner join HR_DEPARTMENT on HR_EMPLOYEES.DEPT_ID = HR_DEPARTMENT.DEPT_ID
+group by HR_DEPARTMENT.DEPT_ID
 order by AVG_SAL desc
