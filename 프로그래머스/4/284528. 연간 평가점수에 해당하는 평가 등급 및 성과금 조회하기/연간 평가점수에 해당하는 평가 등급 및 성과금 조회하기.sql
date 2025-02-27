@@ -1,18 +1,22 @@
-select
-    hr_employees.EMP_NO, EMP_NAME,
+with 평가_등급 as (
+    select EMP_NO,
+        case
+            when avg(SCORE) >= 96 then 'S'
+            when avg(SCORE) >= 90 then 'A'
+            when avg(SCORE) >= 80 then 'B'
+            else 'C'
+        end as GRADE
+    from HR_GRADE
+    group by EMP_NO
+)
+
+select HR_EMPLOYEES.EMP_NO, EMP_NAME, GRADE,
     case
-        when avg(hr_grade.score) >= 96 then 'S'
-        when avg(hr_grade.score) >= 90 then 'A'
-        when avg(hr_grade.score) >= 80 then 'B'
-        else 'C'
-    end 'GRADE',
-    case
-        when avg(hr_grade.score) >= 96 then SAL*0.2
-        when avg(hr_grade.score) >= 90 then SAL*0.15
-        when avg(hr_grade.score) >= 80 then SAL*0.1
+        when GRADE = 'S' then SAL*0.2
+        when GRADE = 'A' then SAL*0.15
+        when GRADE = 'B' then SAL*0.1
         else 0
-    end 'BONUS'
-from hr_employees
-inner join hr_grade on hr_grade.emp_no = hr_employees.emp_no
-group by hr_employees.EMP_NO
-order by hr_grade.EMP_NO
+    end as BONUS
+from HR_EMPLOYEES
+    inner join 평가_등급 on HR_EMPLOYEES.EMP_NO = 평가_등급.EMP_NO
+order by EMP_NO
