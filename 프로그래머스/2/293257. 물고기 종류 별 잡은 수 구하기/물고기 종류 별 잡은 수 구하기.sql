@@ -1,5 +1,5 @@
-select count(*) as FISH_COUNT, FISH_NAME
-from fish_info
-inner join fish_name_info on fish_info.fish_type = fish_name_info.fish_type
-group by fish_name
+select count(ID) as FISH_COUNT, FISH_NAME_INFO.FISH_NAME
+from FISH_INFO
+    inner join FISH_NAME_INFO on FISH_INFO.FISH_TYPE = FISH_NAME_INFO.FISH_TYPE
+group by FISH_NAME_INFO.FISH_NAME
 order by FISH_COUNT desc
