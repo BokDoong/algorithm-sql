@@ -1,11 +1,11 @@
-with MAY_PRODUCT as (
-    select PRODUCT_ID, sum(AMOUNT) as TOTAL_AMOUNT
+with 5월_물품별_판매량 as (
+    select PRODUCT_ID, sum(AMOUNT) as AMOUNT
     from FOOD_ORDER
-        where PRODUCE_DATE like '2022-05%'
+        where year(PRODUCE_DATE) = 2022 and month(PRODUCE_DATE) = 5
     group by PRODUCT_ID
 )
 
-select FOOD_PRODUCT.PRODUCT_ID, PRODUCT_NAME, (TOTAL_AMOUNT * PRICE) as TOTAL_SALES
+select FOOD_PRODUCT.PRODUCT_ID, PRODUCT_NAME, PRICE*AMOUNT as TOTAL_SALES
 from FOOD_PRODUCT
-    inner join MAY_PRODUCT on FOOD_PRODUCT.PRODUCT_ID = MAY_PRODUCT.PRODUCT_ID
-order by TOTAL_SALES desc, FOOD_PRODUCT.PRODUCT_ID asc
+    inner join 5월_물품별_판매량 on FOOD_PRODUCT.PRODUCT_ID = 5월_물품별_판매량.PRODUCT_ID
+order by TOTAL_SALES desc, PRODUCT_ID
