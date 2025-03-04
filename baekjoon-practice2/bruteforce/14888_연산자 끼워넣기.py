@@ -1,66 +1,37 @@
 import sys
 input = sys.stdin.readline
 
-
-# Methods
-def caculate(com):
-  global nums, N, commands
+# 백트래킹
+def backTracking(value, depth, add, minus, gob, div):
+  global minValue, maxValue
   
-  result = nums[0]
-  for i in range(N-1):
-    opt = commands[com[i]]
-    if opt == '+':
-      result = result + nums[i+1]
-    elif opt == '-':
-      result = result - nums[i+1]
-    elif opt == '*':
-      result = result * nums[i+1]
-    elif opt == '/':
-      if result < 0:
-        result = ((result*(-1))//nums[i+1]) * -1
-      else:
-        result = result // nums[i+1]
-  
-  return result
-
-def solve(depth, com):
-  global max_num, min_num
-  
-  if depth == N-1:
-    now = caculate(com)
-    max_num = max(max_num, now)
-    min_num = min(min_num, now)
+  # 끝
+  if depth == N:
+    minValue = min(value, minValue)
+    maxValue = max(value, maxValue)
     return
-  
-  for i in range(N-1):
-    if i in com:
-      continue
-    
-    com.append(i)
-    solve(depth+1, com)
-    com.pop()
+  # 탐색  
+  if add > 0:
+    backTracking(value+nums[depth], depth+1, add-1, minus, gob, div)
+  if minus > 0:
+    backTracking(value-nums[depth], depth+1, add, minus-1, gob, div)
+  if gob > 0:
+    backTracking(value*nums[depth], depth+1, add, minus, gob-1, div)
+  if div > 0:
+    backTracking(int(value/nums[depth]), depth+1, add, minus, gob, div-1)
 
+# 수의 개수
+N = int(input().rstrip())
+# 수
+nums = list(map(int,input().split()))
+# 연산자 : +, -, * /
+op = list(map(int, input().split()))
 
-# Input
-# 숫자 개수, 숫자들
-N = int(input())
-nums = list(map(int, input().split()))
+# 연산
+minValue = 1000000001
+maxValue = -1000000001
+backTracking(nums[0], 1, op[0], op[1], op[2], op[3])
 
-# 연산자 구성
-commands = []
-tmp_commands = ['+', '-', '*', '/']
-tmp = list(map(int, input().split()))    # +, -, *, /
-for t in range(4):
-  for _ in range(tmp[t]):  
-    commands.append(tmp_commands[t])
-
-
-# Main
-max_num = -1000000001
-min_num = 1000000001
-solve(0, [])
-
-
-# Output
-print(max_num)
-print(min_num)
+# 결과
+print(maxValue)
+print(minValue)
