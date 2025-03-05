@@ -1,5 +1,10 @@
-select PRODUCT_CODE, SUM(PRICE*SALES_AMOUNT) as SALES
-from PRODUCT
-    inner join OFFLINE_SALE on PRODUCT.PRODUCT_ID = OFFLINE_SALE.PRODUCT_ID
-group by PRODUCT_CODE
-order by SALES desc, PRODUCT_CODE asc
+with 상품별_판매량 as (
+    select PRODUCT_ID, SUM(SALES_AMOUNT) as SALES_COUNT
+        from OFFLINE_SALE
+    group by PRODUCT_ID
+)
+
+select PRODUCT_CODE, SALES_COUNT*PRICE as SALES
+from 상품별_판매량
+    inner join PRODUCT on 상품별_판매량.PRODUCT_ID = PRODUCT.PRODUCT_ID
+order by SALES desc, PRODUCT_CODE
