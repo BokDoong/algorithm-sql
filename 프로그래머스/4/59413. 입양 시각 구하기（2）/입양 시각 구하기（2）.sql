@@ -1,6 +1,6 @@
-set @hour := -1;
+set @month := -1;
 
-select (@hour := @hour + 1) as HOUR,
-    (select count(*) from ANIMAL_OUTS where hour(DATETIME) = @hour) as COUNT
+select (@month := @month+1) as HOUR, 
+    (select count(*) from ANIMAL_OUTS where hour(DATETIME) = @month) as COUNT
 from ANIMAL_OUTS
-where @hour < 23
+where @month < 23
