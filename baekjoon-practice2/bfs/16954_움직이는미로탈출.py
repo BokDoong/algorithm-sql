@@ -4,13 +4,13 @@ input = sys.stdin.readline
 # 벽 아래 이동
 def moveWalls():
   global walls,visited
-  nextWalls = []
+  nextWalls = set()
   newVisited = [[False]*8 for _ in range(8)] 
   for wallX, wallY in walls:
     if wallX+1 == 8:
       continue
     newVisited[wallX+1][wallY] = True
-    nextWalls.append((wallX+1, wallY))
+    nextWalls.add((wallX+1, wallY))
   walls = nextWalls
   visited = newVisited  # 방문 배열 갱신
 
@@ -43,14 +43,14 @@ def checkWallOrOut(nextX, nextY):
   return nextX < 0 or nextY < 0 or nextX >= 8 or nextY >= 8 or (nextX, nextY) in walls
 
 # 벽 위치
-walls = []
+walls = set()
 # 보드
 board = [[0]*8 for _ in range(8)]
 for x in range(8):
   tmp = list(input().rstrip())
   for y in range(8):
     if tmp[y] == '#':
-      walls.append((x,y))
+      walls.add((x,y))
 
 # 다음 방향, 현재 욱제 위치
 dx, dy = [0,0,-1,-1,-1,0,1,1,1], [0,1,1,0,-1,-1,1,-1,0]
