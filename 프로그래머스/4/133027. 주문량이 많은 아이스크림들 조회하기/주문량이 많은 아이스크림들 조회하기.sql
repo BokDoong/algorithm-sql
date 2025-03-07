@@ -1,16 +1,16 @@
-with TOTAL_ORDER as (
-    select *
-    from FIRST_HALF
-    union all
-    select *
-    from JULY
-), TOP3 as (
-    select FLAVOR, sum(TOTAL_ORDER) as TOTAL_PRICE
-    from TOTAL_ORDER
-        group by FLAVOR
-    order by TOTAL_PRICE desc
-    limit 3
+with 총합_판매량 as (
+    select FLAVOR, sum(TOTAL_ORDER) as TOTAL_ORDER
+    from (
+        select *
+        from FIRST_HALF
+        union all
+        select *
+        from JULY
+    ) as TOTAL_SALES
+    group by FLAVOR
 )
 
 select FLAVOR
-from TOP3
+from 총합_판매량
+order by TOTAL_ORDER desc
+limit 3
