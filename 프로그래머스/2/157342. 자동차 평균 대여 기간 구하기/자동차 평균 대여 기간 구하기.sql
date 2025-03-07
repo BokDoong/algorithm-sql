@@ -1,10 +1,5 @@
-with DURATION_INFO as (
-    select HISTORY_ID, CAR_ID, START_DATE, END_DATE, datediff(END_DATE, START_DATE)+1 as DURATION
-    from CAR_RENTAL_COMPANY_RENTAL_HISTORY
-)
-
-select CAR_ID, round(avg(DURATION),1) as AVERAGE_DURATION
-from DURATION_INFO
+select CAR_ID, round(avg(datediff(END_DATE, START_DATE)+1),1) as AVERAGE_DURATION
+from CAR_RENTAL_COMPANY_RENTAL_HISTORY
 group by CAR_ID
-    having round(avg(DURATION),1) >= 7.0
+    having AVERAGE_DURATION >= 7
 order by AVERAGE_DURATION desc, CAR_ID desc
