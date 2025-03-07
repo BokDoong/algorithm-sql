@@ -1,10 +1,13 @@
-with 프론트엔드_개발자 as (
-    select sum(CODE) as CODE
+with 프론트엔드_기술 as (
+    select sum(CODE) as CODES
     from SKILLCODES
-    where CATEGORY like 'Front%'
+    where category like 'Front%'
 )
 
 select ID, EMAIL, FIRST_NAME, LAST_NAME
 from DEVELOPERS
-    where SKILL_CODE & (select CODE from 프론트엔드_개발자) > 0
+where SKILL_CODE & (
+    select CODES
+    from 프론트엔드_기술
+) > 0
 order by ID
