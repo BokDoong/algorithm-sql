@@ -1,14 +1,17 @@
-with 대여중인_자동차 as (
+with 자동차_ID as (
     select distinct CAR_ID
     from CAR_RENTAL_COMPANY_RENTAL_HISTORY
-        where START_DATE <= '2022-10-16' and END_DATE >= '2022-10-16'
+), 대여중_자동차 as (
+    select distinct CAR_ID
+    from CAR_RENTAL_COMPANY_RENTAL_HISTORY
+    where '2022-10-16' between START_DATE and END_DATE
 )
 
-select distinct CAR_RENTAL_COMPANY_RENTAL_HISTORY.CAR_ID, 
+select 자동차_ID.CAR_ID,
     case
-        when 대여중인_자동차.CAR_ID is null then '대여 가능'
+        when 대여중_자동차.CAR_ID is null then '대여 가능'
         else '대여중'
     end as AVAILABILITY
-from CAR_RENTAL_COMPANY_RENTAL_HISTORY
-    left join 대여중인_자동차 on CAR_RENTAL_COMPANY_RENTAL_HISTORY.CAR_ID = 대여중인_자동차.CAR_ID
-order by CAR_RENTAL_COMPANY_RENTAL_HISTORY.CAR_ID desc
+from 자동차_ID
+left join 대여중_자동차 on 자동차_ID.CAR_ID = 대여중_자동차.CAR_ID
+order by CAR_ID desc
