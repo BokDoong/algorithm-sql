@@ -1,25 +1,23 @@
 import heapq
 
 def solution(operations):
-    maxHeap, minHeap = [], []
+    minHeap, maxHeap = [], []
+    
     for op in operations:
-        com, num = op.split(' ')
-        # 삽입
+        com, num = op.split(" ")
         if com == 'I':
             heapq.heappush(minHeap, int(num))
             heapq.heappush(maxHeap, -1*int(num))
-        # 삭제
         else:
-            if maxHeap:
+            if len(minHeap) > 0:
                 if num == '1':
-                    maxNum = -1*heapq.heappop(maxHeap)
-                    minHeap.remove(maxNum)
+                    maxNum = heapq.heappop(maxHeap)
+                    minHeap.remove(maxNum*-1)
                 else:
                     minNum = heapq.heappop(minHeap)
-                    maxHeap.remove(-1*minNum)
-                
-    # 결과
-    if minHeap:
-        return [max(minHeap), min(minHeap)]
+                    maxHeap.remove(minNum*-1)
+    
+    if len(minHeap) == 0:
+        return [0,0]
     else:
-        return [0, 0]
+        return [max(minHeap), min(minHeap)]
