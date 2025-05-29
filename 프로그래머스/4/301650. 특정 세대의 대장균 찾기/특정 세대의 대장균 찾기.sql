@@ -1,20 +1,20 @@
-with FIRST_GEN as (
-    select *
+with 1세대 as (
+    select ID
     from ECOLI_DATA
     where PARENT_ID is null
-), SECOND_GEN as (
-    select *
+), 2세대 as (
+    select ID
     from ECOLI_DATA
     where PARENT_ID in (
         select ID
-        from FIRST_GEN
+        from 1세대
     )
 )
 
 select ID
 from ECOLI_DATA
 where PARENT_ID in (
-        select ID
-        from SECOND_GEN
-    )
+    select ID
+    from 2세대
+)
 order by ID
