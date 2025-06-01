@@ -1,12 +1,9 @@
-with 종류별_큰_길이 as (
-    select FISH_TYPE, max(LENGTH) as MAX_LENGTH
-    from FISH_INFO
-    group by FISH_TYPE
-)
-
-select ID, FISH_NAME, LENGTH
+select FISH_INFO.ID, MAX_INFO.FISH_NAME, FISH_INFO.LENGTH
 from FISH_INFO
-    inner join 종류별_큰_길이 on FISH_INFO.FISH_TYPE = 종류별_큰_길이.FISH_TYPE
+inner join (
+    select FISH_NAME, FISH_INFO.FISH_TYPE, max(LENGTH) as LENGTH
+    from FISH_INFO
     inner join FISH_NAME_INFO on FISH_INFO.FISH_TYPE = FISH_NAME_INFO.FISH_TYPE
-where LENGTH = MAX_LENGTH
-order by ID
+    group by FISH_NAME, FISH_INFO.FISH_TYPE
+) as MAX_INFO on FISH_INFO.FISH_TYPE = MAX_INFO.FISH_TYPE and FISH_INFO.LENGTH = MAX_INFO.LENGTH
+order by FISH_INFO.ID
