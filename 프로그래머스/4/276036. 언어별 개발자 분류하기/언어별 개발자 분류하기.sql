@@ -1,16 +1,31 @@
-WITH 개발자_등급표 as (
-    SELECT
-        CASE
-            WHEN SKILL_CODE & (SELECT SUM(CODE) FROM SKILLCODES WHERE CATEGORY = 'Front End') > 0 
-                AND SKILL_CODE & (SELECT CODE FROM SKILLCODES WHERE NAME = 'Python') > 0 THEN 'A'
-            WHEN SKILL_CODE & (SELECT CODE FROM SKILLCODES WHERE NAME = 'C#') > 0 THEN 'B'
-            WHEN SKILL_CODE & (SELECT SUM(CODE) FROM SKILLCODES WHERE CATEGORY = 'Front End') > 0 THEN 'C'
-            ELSE NULL
-        END AS GRADE, ID, EMAIL
-    FROM DEVELOPERS
+with 멤버별_등급 as (
+    select
+        case
+            when SKILL_CODE & (
+                select sum(CODE)
+                from SKILLCODES
+                where CATEGORY = 'Front End'
+            ) > 0 and SKILL_CODE & (
+                select sum(CODE)
+                from SKILLCODES
+                where NAME = 'Python'
+            ) > 0 then 'A'
+            when SKILL_CODE & (
+                select sum(CODE)
+                from SKILLCODES
+                where NAME = 'C#'
+            ) > 0 then 'B'
+            when SKILL_CODE & (
+                select sum(CODE)
+                from SKILLCODES
+                where CATEGORY = 'Front End'
+            ) > 0 then 'C'
+        end as GRADE, ID
+    from DEVELOPERS
 )
 
-select *
-from 개발자_등급표
+select GRADE, DEVELOPERS.ID, EMAIL
+from DEVELOPERS
+inner join 멤버별_등급 on DEVELOPERS.ID = 멤버별_등급.ID
 where GRADE is not null
 order by GRADE, ID
