@@ -1,9 +1,11 @@
-select FIRST_HALF.FLAVOR
-from FIRST_HALF
-inner join (
-    select FLAVOR, sum(TOTAL_ORDER) as JULY_ORDER
+select FLAVOR
+from (
+    select *
+    from FIRST_HALF
+    union all
+    select *
     from JULY
-    group by FLAVOR
-) as JULY_ORDER on FIRST_HALF.FLAVOR = JULY_ORDER.FLAVOR
-order by TOTAL_ORDER+JULY_ORDER desc
+) as TOTAL_ICECREAM
+group by FLAVOR
+order by sum(TOTAL_ORDER) desc
 limit 3
