@@ -1,16 +1,16 @@
-with 최대_회원_리뷰 as (
-    select REST_REVIEW.MEMBER_ID, REVIEW_TEXT, date_format(REVIEW_DATE, '%Y-%m-%d') as REVIEW_DATE
+select MEMBER_NAME, REVIEW_TEXT, date_format(REVIEW_DATE, '%Y-%m-%d') as REVIEW_DATE
+from MEMBER_PROFILE
+    inner join REST_REVIEW on MEMBER_PROFILE.MEMBER_ID = REST_REVIEW.MEMBER_ID
+where MEMBER_PROFILE.MEMBER_ID in (
+    select MEMBER_ID
     from REST_REVIEW
-    inner join (
-        select MEMBER_ID
-        from REST_REVIEW
-        group by MEMBER_ID
-        order by count(REVIEW_ID) desc
-        limit 1
-    ) as 최대_회원 on REST_REVIEW.MEMBER_ID = 최대_회원.MEMBER_ID
+    group by MEMBER_ID
+        having count(REVIEW_ID) = (
+            select max(REVIEW_IDS_CNT) 
+            from (
+                select MEMBER_ID, count(REVIEW_ID) as REVIEW_IDS_CNT
+                from REST_REVIEW
+                group by MEMBER_ID
+            ) as REST_REVIEW_CNTS)
 )
-
-select MEMBER_NAME, REVIEW_TEXT, REVIEW_DATE
-from 최대_회원_리뷰
-inner join MEMBER_PROFILE on 최대_회원_리뷰.MEMBER_ID = MEMBER_PROFILE.MEMBER_ID
 order by REVIEW_DATE, REVIEW_TEXT
