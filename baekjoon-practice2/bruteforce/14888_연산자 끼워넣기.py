@@ -1,37 +1,34 @@
 import sys
 input = sys.stdin.readline
 
-# 백트래킹
-def backTracking(value, depth, add, minus, gob, div):
-  global minValue, maxValue
+# 탐색
+def calculate(plus, minus, multi, div, depth, result):
+  global N, nums, maxResult, minResult
   
-  # 끝
-  if depth == N:
-    minValue = min(value, minValue)
-    maxValue = max(value, maxValue)
+  if depth == N-1:
+    maxResult = max(maxResult, result)
+    minResult = min(minResult, result)
     return
-  # 탐색  
-  if add > 0:
-    backTracking(value+nums[depth], depth+1, add-1, minus, gob, div)
+  
+  if plus > 0:
+    calculate(plus-1, minus, multi, div, depth+1, result+nums[depth+1])
   if minus > 0:
-    backTracking(value-nums[depth], depth+1, add, minus-1, gob, div)
-  if gob > 0:
-    backTracking(value*nums[depth], depth+1, add, minus, gob-1, div)
+    calculate(plus, minus-1, multi, div, depth+1, result-nums[depth+1])
+  if multi > 0:
+    calculate(plus, minus, multi-1, div, depth+1, result*nums[depth+1])
   if div > 0:
-    backTracking(int(value/nums[depth]), depth+1, add, minus, gob, div-1)
+    if result < 0:
+      calculate(plus, minus, multi, div-1, depth+1, -(abs(result)//nums[depth+1]))
+    else:
+      calculate(plus, minus, multi, div-1, depth+1, result//nums[depth+1])
 
-# 수의 개수
-N = int(input().rstrip())
-# 수
-nums = list(map(int,input().split()))
-# 연산자 : +, -, * /
-op = list(map(int, input().split()))
+# Input
+N = int(input())
+nums = list(map(int, input().split()))
+plus, minus, multi, div = map(int, input().split())
 
-# 연산
-minValue = 1000000001
-maxValue = -1000000001
-backTracking(nums[0], 1, op[0], op[1], op[2], op[3])
-
-# 결과
-print(maxValue)
-print(minValue)
+# Main
+maxResult, minResult = -sys.maxsize, sys.maxsize
+calculate(plus, minus, multi, div, 0, nums[0])
+print(maxResult)
+print(minResult)
