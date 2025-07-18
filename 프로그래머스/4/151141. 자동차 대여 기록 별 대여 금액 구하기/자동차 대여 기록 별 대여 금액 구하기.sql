@@ -1,17 +1,26 @@
-with 트럭_대여정보 as (
-    select HISTORY_ID, datediff(END_DATE, START_DATE)+1 as RENT_DATE, (datediff(END_DATE, START_DATE)+1)*DAILY_FEE as FEE
+with 트럭_대여날짜_일일요금 as (
+    select HISTORY_ID, DAILY_FEE, datediff(END_DATE, START_DATE) + 1 as DATE_DIFF
     from CAR_RENTAL_COMPANY_RENTAL_HISTORY
-    inner join (
-        select CAR_ID, DAILY_FEE from CAR_RENTAL_COMPANY_CAR where CAR_TYPE = '트럭'
-    ) as 트럭_정보 on CAR_RENTAL_COMPANY_RENTAL_HISTORY.CAR_ID = 트럭_정보.CAR_ID
+    inner join CAR_RENTAL_COMPANY_CAR 
+        on CAR_RENTAL_COMPANY_RENTAL_HISTORY.CAR_ID = CAR_RENTAL_COMPANY_CAR.CAR_ID
+    where CAR_TYPE = '트럭'
 )
 
-select HISTORY_ID,
+select HISTORY_ID, 
     case
-        when RENT_DATE >= 90 then round(FEE*(1-0.01*(select DISCOUNT_RATE from CAR_RENTAL_COMPANY_DISCOUNT_PLAN where CAR_TYPE = '트럭' and DURATION_TYPE = '90일 이상')), 0)
-        when RENT_DATE >= 30 then round(FEE*(1-0.01*(select DISCOUNT_RATE from CAR_RENTAL_COMPANY_DISCOUNT_PLAN where CAR_TYPE = '트럭' and DURATION_TYPE = '30일 이상')), 0)
-        when RENT_DATE >= 7 then round(FEE*(1-0.01*(select DISCOUNT_RATE from CAR_RENTAL_COMPANY_DISCOUNT_PLAN where CAR_TYPE = '트럭' and DURATION_TYPE = '7일 이상')), 0)
-        else FEE
+        when DATE_DIFF >= 90
+            then round(DAILY_FEE * DATE_DIFF * 
+                (select (100-DISCOUNT_RATE)/100 from CAR_RENTAL_COMPANY_DISCOUNT_PLAN 
+                 where DURATION_TYPE = '90일 이상' and CAR_TYPE = '트럭'), 0)
+        when DATE_DIFF >= 30
+            then round(DAILY_FEE * DATE_DIFF * 
+                (select (100-DISCOUNT_RATE)/100 from CAR_RENTAL_COMPANY_DISCOUNT_PLAN 
+                 where DURATION_TYPE = '30일 이상' and CAR_TYPE = '트럭'), 0)
+        when DATE_DIFF >= 7
+            then round(DAILY_FEE * DATE_DIFF * 
+                (select (100-DISCOUNT_RATE)/100 from CAR_RENTAL_COMPANY_DISCOUNT_PLAN 
+                 where DURATION_TYPE = '7일 이상' and CAR_TYPE = '트럭'), 0)
+        else DAILY_FEE * DATE_DIFF
     end as FEE
-from 트럭_대여정보
+from 트럭_대여날짜_일일요금
 order by FEE desc, HISTORY_ID desc
