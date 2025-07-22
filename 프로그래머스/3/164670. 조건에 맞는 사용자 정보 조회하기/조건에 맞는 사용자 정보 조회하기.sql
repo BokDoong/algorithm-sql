@@ -1,7 +1,9 @@
-select USER_ID, NICKNAME, concat(CITY, ' ', STREET_ADDRESS1, ' ', STREET_ADDRESS2) as 전체주소, 
-    concat(substr(TLNO, 1, 3), '-', substr(TLNO, 4, 4), '-', substr(TLNO, 8,4)) as 전화번호
+select USER_ID, NICKNAME, concat(CITY, ' ', STREET_ADDRESS1, ' ', STREET_ADDRESS2) as '전체주소', concat(substring(TLNO, 1, 3), '-', substring(TLNO, 4, 4), '-', substring(TLNO, 8, 4)) as '전화번호'
 from USED_GOODS_USER
-    inner join USED_GOODS_BOARD on USED_GOODS_USER.USER_ID = USED_GOODS_BOARD.WRITER_ID
-group by USER_ID
-    having count(*) >= 3
+where USER_ID in
+(
+    select WRITER_ID
+    from USED_GOODS_BOARD
+    group by WRITER_ID having count(BOARD_ID) >= 3
+)
 order by USER_ID desc
