@@ -1,15 +1,18 @@
 import sys
 input = sys.stdin.readline
 
-a = ' ' + input().rstrip()
-b = ' ' + input().rstrip()
-dp = [[0]*len(b) for _ in range(len(a))]
+# 입력
+firstWord = input().rstrip()
+secondWord = input().rstrip()
 
-for i in range(1, len(a)):
-  for j in range(1, len(b)):
-    if a[i] == b[j]:
-      dp[i][j] = dp[i-1][j-1]+1
+# DP
+DP = [[0]*(len(firstWord)+1) for _ in range(len(secondWord)+1)]
+for i in range(1, len(secondWord)+1):
+  for j in range(1, len(firstWord)+1):
+    if secondWord[i-1] == firstWord[j-1]:
+      DP[i][j] = DP[i-1][j-1] + 1
     else:
-      dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+      DP[i][j] = max(DP[i-1][j], DP[i][j-1])
 
-print(dp[-1][-1])
+# 결과
+print(DP[len(secondWord)][len(firstWord)])
