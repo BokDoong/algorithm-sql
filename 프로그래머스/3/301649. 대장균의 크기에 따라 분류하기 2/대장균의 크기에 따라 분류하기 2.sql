@@ -1,15 +1,18 @@
-with 크기_랭킹 as (
-    select ID,
-        rank() over (order by SIZE_OF_COLONY desc) as COLONY_RANK
+with 
+SIZE_RANK as (
+    select ID, rank() over (order by SIZE_OF_COLONY desc) as RNK
     from ECOLI_DATA
-    order by ID
+),
+CNT as (
+    select count(*) as total from ECOLI_DATA
 )
 
 select ID,
-    case
-        when COLONY_RANK <= (select (1/4)*count(ID) from 크기_랭킹) then 'CRITICAL'
-        when COLONY_RANK <= (select (1/2)*count(ID) from 크기_랭킹) then 'HIGH'
-        when COLONY_RANK <= (select (3/4)*count(ID) from 크기_랭킹) then 'MEDIUM'
-        else 'LOW'
-    end as COLONY_NAME
-from 크기_랭킹
+       case
+         when RNK <= total*0.25 then 'CRITICAL'
+         when RNK <= total*0.5  then 'HIGH'
+         when RNK <= total*0.75 then 'MEDIUM'
+         else 'LOW'
+       end as COLONY_NAME
+from SIZE_RANK, CNT
+order by ID;
