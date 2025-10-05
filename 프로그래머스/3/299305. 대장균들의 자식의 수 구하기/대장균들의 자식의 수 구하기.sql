@@ -1,5 +1,5 @@
-select PARENT.ID, count(CHILD.ID) as CHILD_COUNT
-from ECOLI_DATA as PARENT
-left join ECOLI_DATA as CHILD on PARENT.ID = CHILD.PARENT_ID
-group by PARENT.ID
-order by PARENT.ID
+select A.ID, count(B.ID) as CHILD_COUNT
+from ECOLI_DATA as A
+left join ECOLI_DATA as B on A.ID = B.PARENT_ID
+group by A.ID
+order by A.ID
