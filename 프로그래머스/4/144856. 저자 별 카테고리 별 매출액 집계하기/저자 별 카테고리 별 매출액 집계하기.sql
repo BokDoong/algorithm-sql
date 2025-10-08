@@ -1,10 +1,13 @@
-select BOOK.AUTHOR_ID, AUTHOR_NAME, CATEGORY, sum(SALES*PRICE) as TOTAL_SALES
-from BOOK
-    inner join (
-        select BOOK_ID, SALES, SALES_DATE
-        from BOOK_SALES
-        where year(SALES_DATE) = 2022 and month(SALES_DATE) = 1
-    ) as JAN_BOOK on BOOK.BOOK_ID = JAN_BOOK.BOOK_ID
-    inner join AUTHOR on BOOK.AUTHOR_ID = AUTHOR.AUTHOR_ID
-group by BOOK.AUTHOR_ID, CATEGORY
-order by AUTHOR_ID, CATEGORY desc
+with 판매량_집계 as(
+    select BOOK_SALES.BOOK_ID, CATEGORY, AUTHOR_ID, sum(SALES*PRICE) as SALES_AMOUNT
+    from BOOK_SALES
+        inner join BOOK on BOOK_SALES.BOOK_ID = BOOK.BOOK_ID    
+    where SALES_DATE like '2022-01%'
+    group by BOOK_SALES.BOOK_ID
+)
+
+select 판매량_집계.AUTHOR_ID, AUTHOR_NAME, CATEGORY, sum(SALES_AMOUNT) as TOTAL_SALES
+from 판매량_집계
+    inner join AUTHOR on 판매량_집계.AUTHOR_ID = AUTHOR.AUTHOR_ID
+group by 판매량_집계.AUTHOR_ID, CATEGORY
+order by 판매량_집계.AUTHOR_ID, CATEGORY desc
