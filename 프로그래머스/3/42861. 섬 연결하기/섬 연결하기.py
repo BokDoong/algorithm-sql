@@ -1,28 +1,16 @@
 def solution(n, costs):
-    # 비용 정렬
-    costs.sort(key = lambda x : x[2])
-    # 부모, 비용(답), 깊이
-    parents = [i for i in range(n)]
     answer = 0
-    depth = 1
-    
-    # 조상 노드 찾기
-    def find(node):
-        if parents[node] == node:
-            return node
-        return find(parents[node])
-    # 합치기
-    def union(nodeA, nodeB):
-        parentA, parentB = find(nodeA), find(nodeB)
-        parents[parentB] = parentA
-    
-    # 크루스칼
-    while depth < n:
-        nodeA, nodeB, cost = costs.pop(0)
-        parentA, parentB = find(nodeA), find(nodeB)
-        if parentA != parentB:
-            union(nodeA, nodeB)
-            answer += cost
-            depth += 1
-        
+    costs.sort(key = lambda x: x[2]) 
+    link = set([costs[0][0]])
+
+    # Kruskal 알고리즘으로 최소 비용 구하기
+    while len(link) != n:
+        for v in costs:
+            if v[0] in link and v[1] in link:
+                continue
+            if v[0] in link or v[1] in link:
+                link.update([v[0], v[1]])
+                answer += v[2]
+                break
+                
     return answer
