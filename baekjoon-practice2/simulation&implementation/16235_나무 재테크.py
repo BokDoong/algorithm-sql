@@ -2,75 +2,72 @@ from collections import deque
 import sys
 input = sys.stdin.readline
 
-# 겨울 - 양분 추가
+
+def spring_summer():
+    for i in range(N):
+        for j in range(N):
+            if tree[i][j]:
+                # 매번 정렬 (가을에 appendleft하므로)
+                tree[i][j] = deque(sorted(tree[i][j]))
+                tree_cnt = len(tree[i][j])
+                
+                for k in range(tree_cnt):
+                    # 봄: 양분 먹기
+                    if earth[i][j] >= tree[i][j][k]:
+                        earth[i][j] -= tree[i][j][k]
+                        tree[i][j][k] += 1
+                    # 여름: 양분 부족 시 죽음
+                    else:
+                        # 현재부터 뒤에 있는 모든 나무 죽음
+                        for _ in range(k, tree_cnt):
+                            earth[i][j] += tree[i][j].pop() // 2
+                        break
+
+
+def autumn():
+    for i in range(N):
+        for j in range(N):
+            if tree[i][j]:
+                for age in tree[i][j]:
+                    if age % 5 == 0:
+                        for d in range(8):
+                            ni, nj = i + dx[d], j + dy[d]
+                            if 0 <= ni < N and 0 <= nj < N:
+                                tree[ni][nj].appendleft(1)
+
+
 def winter():
-    for i in range(1, N+1):
-        for j in range(1, N+1):
-            food[i][j] += additionalFood[i][j]
+    for i in range(N):
+        for j in range(N):
+            earth[i][j] += A[i][j]
 
-# 가을 - 주변에 나무 추가
-def addNearTrees(x, y):
-    dx = [-1, -1, -1, 0, 0, 1, 1, 1]
-    dy = [-1, 0, 1, -1, 1, -1, 0, 1]
-    
-    for i in range(8):
-        nx, ny = x + dx[i], y + dy[i]
-        if 1 <= nx <= N and 1 <= ny <= N:
-            trees[(nx, ny)].appendleft(1)  # 나이가 어린 순으로 정렬 유지
 
-# 입력
 N, M, K = map(int, input().split())
 
-# 초기 양분: 기본 5
-food = [[5] * (N + 1) for _ in range(N + 1)]
+# 겨울에 추가할 양분
+A = [list(map(int, input().split())) for _ in range(N)]
 
-# 추가되는 양분 정보
-additionalFood = [[]] + [[0] + list(map(int, input().split())) for _ in range(N)]
+# 3차원 리스트로 나무 관리
+tree = [[deque() for _ in range(N)] for _ in range(N)]
 
-# 나무 정보
-trees = {(x, y): deque() for x in range(1, N + 1) for y in range(1, N + 1)}
-
-# 나무 입력 (나이가 어린 순으로 추가해야 함)
+# 나무 정보 입력
 for _ in range(M):
     x, y, age = map(int, input().split())
-    trees[(x, y)].append(age)  # 오름차순 정렬 필요
+    tree[x-1][y-1].append(age)
 
-# K년 동안 반복
+# 땅 (초기값 5)
+earth = [[5] * N for _ in range(N)]
+
+# 8방향
+dx = [-1, -1, -1, 0, 0, 1, 1, 1]
+dy = [-1, 0, 1, -1, 1, -1, 0, 1]
+
+# K년 시뮬레이션
 for _ in range(K):
-    new_trees = []  # 가을에 번식할 나무 저장
-
-    # 봄 & 여름
-    for x in range(1, N+1):
-        for y in range(1, N+1):
-            if not trees[(x, y)]:
-                continue
-
-            now_food = food[x][y]
-            new_ages = deque()
-            dead_food = 0
-
-            for _ in range(len(trees[(x, y)])):
-                age = trees[(x, y)].popleft()
-                
-                if now_food >= age:
-                    now_food -= age
-                    new_ages.append(age + 1)
-
-                    if (age + 1) % 5 == 0:
-                        new_trees.append((x, y))  # 가을 번식을 위해 저장
-                else:
-                    dead_food += age // 2  # 여름: 죽은 나무는 양분이 됨
-
-            trees[(x, y)] = new_ages
-            food[x][y] = now_food + dead_food  # 여름: 죽은 나무의 양분 반영
-
-    # 가을 (저장된 번식 가능한 나무들 처리)
-    for x, y in new_trees:
-        addNearTrees(x, y)
-
-    # 겨울: 양분 추가
+    spring_summer()
+    autumn()
     winter()
 
-# 살아있는 나무 개수 출력
-result = sum(len(trees[(x, y)]) for x in range(1, N + 1) for y in range(1, N + 1))
+# 살아남은 나무 개수
+result = sum(len(tree[i][j]) for i in range(N) for j in range(N))
 print(result)
