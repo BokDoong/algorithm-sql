@@ -1,11 +1,18 @@
-select FLAVOR
-from (
-    select *
+with TOTAL_ORDER as (
+    select SHIPMENT_ID, FLAVOR, TOTAL_ORDER
     from FIRST_HALF
+    
     union all
-    select *
+    
+    select SHIPMENT_ID, FLAVOR, TOTAL_ORDER
     from JULY
-) as TOTAL_ICECREAM
-group by FLAVOR
-order by sum(TOTAL_ORDER) desc
-limit 3
+), TOP3_TOTAL_ORDER as (
+    select FLAVOR, sum(TOTAL_ORDER) as TOTAL_ORDER
+    from TOTAL_ORDER
+    group by FLAVOR
+    order by TOTAL_ORDER desc
+    limit 3
+)
+
+select FLAVOR
+from TOP3_TOTAL_ORDER
