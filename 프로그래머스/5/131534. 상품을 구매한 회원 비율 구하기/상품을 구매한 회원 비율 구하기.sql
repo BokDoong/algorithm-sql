@@ -1,8 +1,11 @@
-select date_format(ONLINE_SALE.SALES_DATE, '%Y') as YEAR,
-    date_format(ONLINE_SALE.SALES_DATE, '%m') as MONTH, 
-    count(distinct USER_INFO.USER_ID) as PURCHASED_USERS, round(count(distinct USER_INFO.USER_ID)/(select count(*) from USER_INFO where joined like '2021%'), 1) as PURCHASED_RATIO
-from USER_INFO
-join ONLINE_SALE on USER_INFO.USER_ID = ONLINE_SALE.USER_ID
-where USER_INFO.JOINED like '2021%'
-group by YEAR, MONTH
+select 
+    year(SALES_DATE) as YEAR, month(SALES_DATE) as MONTH, 
+    count(distinct ONLINE_SALE.USER_ID) as PURCHASED_USERS, round((count(distinct ONLINE_SALE.USER_ID) / (select count(USER_ID) from USER_INFO where year(JOINED) = 2021)), 1) as PUCHASED_RATIO
+from ONLINE_SALE
+inner join (
+    select USER_ID
+    from USER_INFO
+    where year(JOINED) = 2021
+) as 2021_가입자수 on ONLINE_SALE.USER_ID = 2021_가입자수.USER_ID
+group by year(SALES_DATE), month(SALES_DATE)
 order by YEAR, MONTH
