@@ -1,28 +1,25 @@
-# Input
+import sys
+input = sys.stdin.readline
+
 N = int(input())
 nums = list(map(int, input().split()))
 
-# Main
-# 1. 정방향 증가하는 부분수열
-dp1 = [1] * N
+DP1 = [1 for _ in range(N)]
 for i in range(N):
   for j in range(i):
     if nums[j] < nums[i]:
-      dp1[i] = max(dp1[j]+1, dp1[i])
-
-# 2. 역방향 증가하는 부분수열
+      DP1[i] = max(DP1[j]+1, DP1[i])
+      
 nums.reverse()
-dp2 = [1] * N
+DP2 = [1 for _ in range(N)]
 for i in range(N):
   for j in range(i):
     if nums[j] < nums[i]:
-      dp2[i] = max(dp2[j]+1, dp2[i])
-dp2.reverse()
-
-# 3. 최대값 찾기
-result = 0
-for i in range(N):
-  result = max(result, dp1[i]+dp2[i])
-
-# Output
-print(result-1)
+      DP2[i] = max(DP2[j]+1, DP2[i])
+DP2.reverse()
+      
+result = -sys.maxsize
+for n in range(N):
+  result = max(result, DP1[n]+DP2[n]-1)
+  
+print(result)
