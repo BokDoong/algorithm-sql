@@ -3,25 +3,26 @@ import sys
 input = sys.stdin.readline
 
 N, M = map(int, input().split())
-connected = [[] for _ in range(N+1)]    # 연결된 노드
-inputNodesCnt = [0] * (N+1)   # 진입차수 개수
+connected = [[] for _ in range(N+1)]
+sonCounts = [0]*(N+1)
 
-for _ in range(M):    # 그래프
+for _ in range(M):
   start, end = map(int, input().split())
+  sonCounts[end] += 1
   connected[start].append(end)
-  inputNodesCnt[end] += 1
-  
-queue, result = deque([]), []
-for v in range(1, N+1):
-  if inputNodesCnt[v] == 0:
-    queue.append(v)
+
+result, queue = [], deque([])
+for i in range(1, N+1):
+  if sonCounts[i] == 0:
+    queue.append(i)
     
 while queue:
-  node = queue.popleft()
-  result.append(node)
-  for connectedNode in connected[node]:
-    inputNodesCnt[connectedNode] -= 1
-    if inputNodesCnt[connectedNode] == 0:
-      queue.append(connectedNode)
-
+  num = queue.popleft()
+  result.append(num)
+  
+  for c in connected[num]:
+    sonCounts[c] -= 1
+    if sonCounts[c] == 0:
+      queue.append(c)
+        
 print(*result)
