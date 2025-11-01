@@ -1,10 +1,10 @@
 # [level 3] 디스크 컨트롤러 - 42627 
 
-[문제 링크](https://school.programmers.co.kr/learn/courses/30/lessons/42627?language=python3) 
+[문제 링크](https://school.programmers.co.kr/learn/courses/30/lessons/42627?language=java) 
 
 ### 성능 요약
 
-메모리: 9.29 MB, 시간: 9.11 ms
+메모리: 95.4 MB, 시간: 25.45 ms
 
 ### 구분
 
@@ -16,7 +16,7 @@
 
 ### 제출 일자
 
-2025년 03월 30일 13:45:08
+2025년 11월 01일 21:33:51
 
 ### 문제 설명
 
