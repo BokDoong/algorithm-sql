@@ -1,16 +1,12 @@
-import java.util.*;
-import java.lang.*;
+// static PriorityQueue<PC> freePCs = new PriorityQueue<>(Comparator.comparingInt(p -> p.idx));
+
 import java.io.*;
+import java.util.*;
 
 class Main {
 
     static int N;
-    static int[][] human;
-
-    static PriorityQueue<PC> minHeap = new PriorityQueue<>(Comparator.comparingInt(p -> p.endTime));
-    static PriorityQueue<PC> freePCs = new PriorityQueue<>(Comparator.comparingInt(p -> p.idx));
-    
-    static List<Integer> pcUsageCounts = new ArrayList<>();
+    static int[][] usageTimes;
 
     static void input() throws IOException {
 
@@ -18,20 +14,18 @@ class Main {
         StringTokenizer st = new StringTokenizer(br.readLine());
 
         N = Integer.parseInt(st.nextToken());
-        human = new int[N][2];
+        usageTimes = new int[N][2];
 
         for ( int i = 0 ; i < N ; i++ ) {
-
             st = new StringTokenizer(br.readLine());
-            human[i][0] = Integer.parseInt(st.nextToken());
-            human[i][1] = Integer.parseInt(st.nextToken());
-            
+            usageTimes[i][0] = Integer.parseInt(st.nextToken());
+            usageTimes[i][1] = Integer.parseInt(st.nextToken());
         }
         
     }
 
-    static void sortHuman() {
-        Arrays.sort(human, Comparator.comparingInt((int[] h) -> h[0]));
+    static void sortUsageTimes() {
+        Arrays.sort(usageTimes, Comparator.comparingInt(ut -> ut[0]));
     }
 
     static class PC {
@@ -39,80 +33,71 @@ class Main {
         int idx;
         int endTime;
 
-        PC(int idx, int endTime ) {
+        PC ( int idx, int endTime ) {
             this.idx = idx;
             this.endTime = endTime;
         }
 
-        void setEndTime(int endTime) {
+        void setEndTime( int endTime ) {
             this.endTime = endTime;
-        }
-
-        int getIdx() {
-            return this.idx;
-        }
-
-        int getEndTime() {
-            return this.endTime;
-        }
-
-        @Override
-        public String toString() {
-            return "idx : " + idx + ", endTime : " + endTime;
         }
         
     }
+
+    static List<Integer> pcUsages = new ArrayList<>();
+    static PriorityQueue<PC> canUse = new PriorityQueue<>(Comparator.comparingInt(pc -> pc.idx));
+    static PriorityQueue<PC> cannotUse = new PriorityQueue<>(Comparator.comparingInt(pc -> pc.endTime));
 
     static void solve() {
 
         for ( int n = 0 ; n < N ; n++ ) {
 
-            int startTime = human[n][0];
-            int endTime = human[n][1];
+            // 시작&끝 시간
+            int startTime = usageTimes[n][0];
+            int endTime = usageTimes[n][1];
 
-            // 들어갈 수 있는 PC 찾기
-            while ( !minHeap.isEmpty() && minHeap.peek().getEndTime() <= startTime ) {
-                PC freePC = minHeap.poll();
-                freePCs.add(freePC);
+            // 쓸 수 있는 PCs 선별
+            while ( !cannotUse.isEmpty() && cannotUse.peek().endTime <= startTime ) {
+                canUse.add(cannotUse.poll());
             }
-
-            // 들어갈 수 없으면 
-            if ( freePCs.isEmpty() ) {
-
-                // 새로 추가
-                PC newPC = new PC(pcUsageCounts.size(), endTime);
-                pcUsageCounts.add(1);
-                minHeap.add(newPC);
+            
+            // 쓸 수 있는 PC 있다면 사용
+            if ( !canUse.isEmpty() ) {
                 
+                PC willUse = canUse.poll();
+                willUse.setEndTime(endTime);
+                cannotUse.add(willUse);
+
+                int pcUsage = pcUsages.get(willUse.idx);
+                pcUsages.set(willUse.idx, pcUsage + 1);
+
             }
-            // 들어갈 수 있으면
+            // 없으면 새로 추가
             else {
                 
-                // 가장 최소번호에 넣기
-                PC minPC = freePCs.poll();
-                int count = pcUsageCounts.get(minPC.getIdx());
-                pcUsageCounts.set(minPC.getIdx(), count+1);
-
-                // 종료시간 업데이트하고 다시 넣기
-                minPC.setEndTime(endTime);
-                minHeap.add(minPC);
+                PC willUse = new PC(pcUsages.size(), endTime);
+                cannotUse.add(willUse);
+                pcUsages.add(1);
                 
             }
             
         }
         
     }
+
+    static void output() {
+        System.out.println(pcUsages.size());
+        for ( int pu : pcUsages ) {
+            System.out.print(pu + " ");
+        }
+    }
     
     public static void main(String[] args) throws IOException {
 
         input();
-        sortHuman();
+        sortUsageTimes();
         solve();
-
-        System.out.println(pcUsageCounts.size());
-        for ( int c : pcUsageCounts ) {
-            System.out.print(c + " ");
-        }
+        output();
         
     }
     
