@@ -1,26 +1,20 @@
 import java.io.*;
 import java.util.*;
-import java.util.stream.*;
 
-public class Main {
+class Main {
 
-    static int N;
-    static int M;
-    static int P;
-
+    static int N, M, P;
+    static int[] S;
     static char[][] board;
-    static List<Integer> moveCount;
-    static HashMap<Integer, List<Node>> castles = new HashMap<>();
 
-    static int[] dx = {1, -1, 0, 0};
-    static int[] dy = {0, 0, 1, -1};
+    static Map<Integer, List<Node>> indexes = new HashMap<>();
 
     static class Node {
 
-        private int x;
-        private int y;
+        int x;
+        int y;
 
-        public Node(int x, int y) {
+        Node(int x, int y) {
             this.x = x;
             this.y = y;
         }
@@ -32,139 +26,170 @@ public class Main {
         
     }
 
-    static class QueueNode {
+    // 입력
+    static void input() throws IOException {
 
-        private Node node;
-        private int movedCount;
-
-        public QueueNode(Node node, int moveCount) {
-            this.node = node;
-            this.movedCount = moveCount;
-        }
-        
-    }
-
-    public static void input() throws IOException {
-        
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        
         StringTokenizer st = new StringTokenizer(br.readLine());
+
         N = Integer.parseInt(st.nextToken());
         M = Integer.parseInt(st.nextToken());
         P = Integer.parseInt(st.nextToken());
 
-        moveCount = Arrays.stream(br.readLine().split(" "))
-            .map(Integer::parseInt)
-            .collect(Collectors.toList());
+        st = new StringTokenizer(br.readLine());
+        S = new int[P];
+        for ( int p = 0 ; p < P ; p++ ) {
+            S[p] = Integer.parseInt(st.nextToken());
+        }
 
         board = new char[N][M];
-        for (int i = 0; i < N; i++) {
-            String line = br.readLine();
-            for (int j = 0; j < M; j++) {
-                board[i][j] = line.charAt(j);
-            }
-        }
-        
-    }
+        for ( int n = 0 ; n < N ; n++ ) {
 
-    public static void initialize() {
-        
-        // 플레이어별 성 위치
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < M; j++) {
-                if (board[i][j] != '.' && board[i][j] != '#') {
-                    Integer player = Integer.valueOf(board[i][j] - '0');
-                    Node castle = new Node(i, j);
-                    if (castles.containsKey(player)) {
-                        castles.get(player).add(castle);
-                    } else {
-                        List<Node> list = new ArrayList<>();
-                        list.add(castle);
-                        castles.put(player, list);
+            st = new StringTokenizer(br.readLine());
+            String tmpChar = st.nextToken();
+
+            for ( int m = 0 ; m < M ; m++ ) {
+
+                // 입력
+                char target = tmpChar.charAt(m);
+                board[n][m] = target;
+
+                // 숫자이면 인덱스 셋팅
+                if ( 49 <= (int)target && (int)target <= 57 ) {
+
+                    int targetInt = (int)target - 48;
+                    
+                    if ( indexes.containsKey(targetInt) ) {
+                        indexes.get(targetInt).add(new Node(n, m));
                     }
+                    else {
+                        List<Node> newNodes = new ArrayList<>();
+                        newNodes.add(new Node(n, m));
+                        indexes.put(targetInt, newNodes);
+                    }
+                    
                 }
+                
             }
+            
         }
         
     }
 
-    public static boolean canGo(int x, int y) {
-        if (0 <= x && x < N && 0 <= y && y < M) {
+    // 이동
+    static int[] dx = {-1, 0, 1, 0};
+    static int[] dy = {0, -1, 0, 1};
+
+    static class QueueNode {
+
+        Node node;
+        int movedCount;
+
+        QueueNode(Node node, int movedCount) {
+            this.node = node;
+            this.movedCount = movedCount;
+        }
+        
+    }
+
+    static boolean canGo(int x, int y) {
+        if ( x < 0 || x >= N || y < 0 || y >= M ) {
+            return false;
+        }
+        if ( board[x][y] == '.' ) {
             return true;
         }
         return false;
     }
 
-    public static void main(String[] args) throws IOException {
+    static void move() {
 
-        // 입력
-        input();
-
-        // 플레이어별 성위치 업대이트
-        initialize();
-
-        // 게임
-        while (true) {
+        while ( true ) {
             
-            boolean isEnd = true;
+            boolean moved = false;
             
-            for (int p = 1; p <= P; p++) {
-                // 플레이어의 성, 최대 움직일 수 있는 카운트
-                List<Node> playerCastles = castles.get(p);
-                int moveMaxCount = moveCount.get(p-1);
+            // 하나씩 돌아가며 이동
+            for ( int p = 1 ; p <= P ; p++ ) {
 
-                // 플레이어의 성 넣기
-                Queue<QueueNode> queue = new LinkedList<>();
-                for (int i = 0; i < playerCastles.size(); i++) {
-                    QueueNode qn = new QueueNode(playerCastles.get(i), 0);
-                    queue.add(qn);
-                }
+                // 새로운 노드 리스트
                 List<Node> newNodes = new ArrayList<>();
-                castles.put(p, newNodes);
+    
+                // 큐 초기화 - 지금 인덱스의 노드가 있는 위치들 추가
+                Queue<QueueNode> queue = new LinkedList<>();
+                for ( Node node : indexes.get(p) ) {
+                    queue.add(new QueueNode(node, 0));
+                }
+    
+                // BFS
+                while ( !queue.isEmpty() ) {
+    
+                    // 노드
+                    QueueNode nowQueueNode = queue.poll();
+    
+                    // 다음 노드
+                    for ( int i = 0 ; i < 4 ; i++ ) {
+                        
+                        int nextX = nowQueueNode.node.x + dx[i];
+                        int nextY = nowQueueNode.node.y + dy[i];
+    
+                        if ( nowQueueNode.movedCount < S[p-1] && canGo(nextX, nextY) ) {
+                            
+                            // 보드 마킹
+                            board[nextX][nextY] = (char)(p + '0');
+                            
+                            // 다음 노드
+                            Node nextNode = new Node(nextX, nextY);
+                            queue.add(new QueueNode(nextNode, nowQueueNode.movedCount+1));
+                            newNodes.add(nextNode);
 
-                // 찾기
-                while (!queue.isEmpty()) {
-                    QueueNode qn = queue.poll();
-                    int movedCount = qn.movedCount;
-                    
-                    if (movedCount < moveMaxCount) {
-                        for (int i = 0; i < 4; i++) {
-                            int nextX = qn.node.x + dx[i];
-                            int nextY = qn.node.y + dy[i];
-
-                            if (canGo(nextX, nextY) && board[nextX][nextY] == '.') {
-                                board[nextX][nextY] = (char)((char)p + '0');
-                                Node nextNode = new Node(nextX, nextY);
-                                castles.get(p).add(nextNode);
-                                queue.add(new QueueNode(nextNode, movedCount+1));
-                                isEnd = false;
-                            }
+                            // 움직였다고 표시
+                            moved = true;
                             
                         }
+                        
                     }
+                    
                 }
+
+                // 인덱스의 노드리스트 리셋
+                indexes.put(p, newNodes);
                 
             }
 
-            // 진행못했으면 끝
-            if (isEnd) {
+            // 움직이지 않았으면 끝
+            if ( !moved ) {
                 break;
             }
+            
         }
+        
+    }
 
-        // 출력
+    static void output() {
+
         int[] result = new int[P];
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < M; j++) {
-                if (board[i][j] != '#' && board[i][j] != '.') {
-                    int p = (int)(board[i][j] - '0');
-                    result[p-1] += 1;
+        
+        for ( int n = 0 ; n < N ; n++ ) {
+            for ( int m = 0 ; m < M ; m++ ) {
+                if ( 49 <= (int)board[n][m] && (int)board[n][m] <= 57 ) {
+                    result[(int)board[n][m] - 49] += 1;
                 }
             }
         }
-        for (int p = 0; p < P; p++) {
-            System.out.print(result[p] + " ");
+
+        for ( int i = 0 ; i < P ; i++ ) {
+            System.out.print(result[i] + " ");
         }
+        
+    }
+
+
+    public static void main(String[] args) throws IOException {
+
+        input();
+        move();
+        output();
+        
     }
     
 }
