@@ -1,18 +1,12 @@
-with ECOLI_RANK as (
-    select ID, PARENT_ID, rank() over (order by SIZE_OF_COLONY desc) as SIZE_RANK
-    from ECOLI_DATA
-), TOTAL_COUNT as (
-    select count(*) as total
-    from ECOLI_DATA
-)
-
-select 
-    ID,
-    case
-        when SIZE_RANK <= total*0.25 then 'CRITICAL'
-        when SIZE_RANK <= total*0.50 then 'HIGH'
-        when SIZE_RANK <= total*0.75 then 'MEDIUM'
-        else 'LOW'
-    end as 'COLONY_NAME'
-from ECOLI_RANK, TOTAL_COUNT
-order by ID
+SELECT ID, 
+    CASE
+        WHEN ( SIZE_RANK <= (SELECT COUNT(*)*0.25 FROM ECOLI_DATA) ) THEN 'CRITICAL'
+        WHEN ( SIZE_RANK <= (SELECT COUNT(*)*0.50 FROM ECOLI_DATA) ) THEN 'HIGH'
+        WHEN ( SIZE_RANK <= (SELECT COUNT(*)*0.75 FROM ECOLI_DATA) ) THEN 'MEDIUM'
+        ELSE 'LOW'
+    END AS COLONY_NAME
+FROM (
+    SELECT ID, RANK() OVER (ORDER BY SIZE_OF_COLONY DESC) AS SIZE_RANK
+    FROM ECOLI_DATA
+) AS ECOLI_RANK
+ORDER BY ID
