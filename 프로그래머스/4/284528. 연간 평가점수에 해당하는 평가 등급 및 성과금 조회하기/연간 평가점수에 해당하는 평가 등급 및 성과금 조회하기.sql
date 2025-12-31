@@ -1,23 +1,20 @@
-with 평가등급_정보 as (
-    select
-        EMP_NO,
-        case 
-            when avg(SCORE) >= 96 then 'S'
-            when avg(SCORE) >= 90 then 'A'
-            when avg(SCORE) >= 80 then 'B'
-            else 'C'
-        end as GRADE
-    from HR_GRADE
-    group by EMP_NO
-)
-
-select HR_EMPLOYEES.EMP_NO, EMP_NAME, GRADE,
-    case
-        when GRADE = 'S' then SAL*0.2
-        when GRADE = 'A' then SAL*0.15
-        when GRADE = 'B' then SAL*0.1
-        else 0
-    end as BONUS
-from HR_EMPLOYEES
-inner join 평가등급_정보 on HR_EMPLOYEES.EMP_NO = 평가등급_정보.EMP_NO
-order by HR_EMPLOYEES.EMP_NO
+SELECT HR_EMPLOYEES.EMP_NO, EMP_NAME, GRADE,
+    CASE
+        WHEN GRADE LIKE 'S' THEN SAL * 0.2
+        WHEN GRADE LIKE 'A' THEN SAL * 0.15
+        WHEN GRADE LIKE 'B' THEN SAL * 0.1
+        ELSE 0
+    END AS BONUS
+FROM HR_EMPLOYEES
+INNER JOIN (
+    SELECT EMP_NO, 
+        CASE
+            WHEN AVG(SCORE) >= 96 THEN 'S'
+            WHEN AVG(SCORE) >= 90 THEN 'A'
+            WHEN AVG(SCORE) >= 80 THEN 'B'
+            ELSE 'C'
+        END AS GRADE
+    FROM HR_GRADE
+    GROUP BY EMP_NO
+) AS GRADE_INFO ON HR_EMPLOYEES.EMP_NO = GRADE_INFO.EMP_NO
+ORDER BY HR_EMPLOYEES.EMP_NO
