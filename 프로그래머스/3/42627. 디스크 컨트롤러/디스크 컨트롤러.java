@@ -3,82 +3,92 @@ import java.io.*;
 
 class Solution {
     
+//     public void debug() {
+        
+//     }
+    
     class Job {
         
         int id;
         int requestTime;
-        int takenTime;
+        int executionTime;
         
-        public Job(int id, int requestTime, int takenTime) {
+        public Job(int id, int requestTime, int executionTime) {
             this.id = id;
             this.requestTime = requestTime;
-            this.takenTime = takenTime;
+            this.executionTime = executionTime;
         }
         
         @Override
         public String toString() {
-            return "id : " + id + ", requestTime : " + requestTime + ", takenTime : " + takenTime;
+            return "id : " + id + ", requestTime : " + requestTime + ", executionTime : " + executionTime;
         }
         
     }
     
-    public int solve(int[][] jobs) {
+    // 대기큐 최소힙 : jobs의 job들을 넣고 기다리는 최소힙, 요청들어온 시간 기준 정렬
+    public PriorityQueue<Job> waitingJobs = new PriorityQueue<>(
+        Comparator.comparingInt((Job job) -> job.requestTime)
+    );
+    // 수행큐 최소힙 : 작업 소요시간 -> 요청시각 -> 작업 번호 순으로 정렬
+    public PriorityQueue<Job> todoJobs = new PriorityQueue<>(
+        Comparator
+            .comparingInt((Job job) -> job.executionTime)
+            .thenComparingInt(job -> job.requestTime)
+            .thenComparingInt(job -> job.id)
+    );
+    
+    // jobs -> 대기큐에 넣기
+    public void initialize(int[][] jobs) {
+        for (int i = 0; i < jobs.length; i++) {
+            Job job = new Job(i, jobs[i][0], jobs[i][1]);
+            waitingJobs.add(job);
+        }
+    }
+    
+    // 1초 카운팅하며 순회 : 대기큐에서 현재 시간보다 적은 태스크들 수행큐에 넣기 -> 수행할 것 있다면 수행 + 시간 뻥튀기 & 아니라면 +1초
+    public int solve(int n) {
         
-        // 요청 시점 기준 정렬
-        Arrays.sort(jobs, Comparator.comparingInt((int[] job) -> job[0]));
+        int result = 0;
+        int sec = 0;
         
-        // 최소힙 초기화
-        PriorityQueue<Job> queue = new PriorityQueue<>(
-            Comparator.comparingInt((Job job) -> job.takenTime)
-                    .thenComparingInt(job -> job.requestTime)
-                    .thenComparingInt(job -> job.id)
-        );
-        
-        // 수행 개수, 총 반환시간, 큐에 넣은 윈도우
-        int done = 0;
-        int totalReturnTime = 0;
-        int window = 0;
-        int time = 0;
-        
-        // ㄱㄱ
-        while ( done < jobs.length ) {
+        while (!waitingJobs.isEmpty()) {
             
-            // 시간 보다 작거나 같은 애들 window부터 쭉 넣기
-            while ( true ) {
+            // 지금 시간보다 요청시간이 작다면 넣기
+            while (true) {
                 
-                // 마지막이라면 벗어나기
-                if ( window == jobs.length) {
-                    break;
-                }
+                Job newJob = waitingJobs.peek();
+                if (newJob == null) break;
                 
-                // 작업 넣기
-                int[] job = jobs[window];
-                if ( job[0] <= time ) {
-                    queue.add(new Job(window, job[0], job[1]));
-                    window += 1;
+                if (newJob.requestTime <= sec) {
+                    todoJobs.add(waitingJobs.poll());
                 } else {
                     break;
                 }
-                
             }
             
-            // 큐에 작업 남아있다면 수행 시간 만큼 점프 -> 반환시간, done 계산
-            if ( !queue.isEmpty() ) {
-                Job todo = queue.poll();
-                time += todo.takenTime;
-                done += 1;
-                totalReturnTime += (time - todo.requestTime);
-            } 
-            // 아니라면 1초 증가
-            else {
-                time += 1;
+            // 할거 있다면 수행 아니면 sec + 1
+            if (!todoJobs.isEmpty()) {
+                Job todo = todoJobs.poll();
+                sec += todo.executionTime;
+                result += (sec - todo.requestTime);
+            } else {
+                sec += 1;
             }
-            
         }
-        return totalReturnTime / jobs.length;
+        
+        // 잔존 태스크 처리
+        while (!todoJobs.isEmpty()) {
+            Job todo = todoJobs.poll();
+            sec += todo.executionTime;
+            result += (sec - todo.requestTime);
+        }
+        
+        return (int) result / n;
     }
     
     public int solution(int[][] jobs) {
-        return solve(jobs);
+        initialize(jobs);
+        return solve(jobs.length);
     }
 }
