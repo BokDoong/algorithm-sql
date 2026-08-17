@@ -3,30 +3,29 @@ import java.util.*;
 class Solution {
     public String solution(String number, int k) {
         
-        // 스택에 하나씩 넣음
-        // 새로운 값 vs top 비교
-        // - 새로운 값이 top보다 작을 때까지 pop & 뺀수++, 앞이 클수록 이득이니까
+        // 스택에 넣기
+        // 앞에 작은 수가 있다면 빼기 : k > 0 and 스택 안비었고 and peek이 나보다 작을 때
         Deque<Character> stack = new ArrayDeque<>();
-        
         for (char c : number.toCharArray()) {
             while (k > 0 && !stack.isEmpty() && stack.peek() < c) {
                 stack.pop();
-                k -= 1;
+                k--;
             }
             stack.push(c);
         }
         
-        
-        // 넘는다면 뒤에서 짜르기
+        // k가 남아있다면 뒤에서 빼기
         while (k > 0) {
             stack.pop();
-            k -= 1;
+            k--;
         }
         
-         StringBuilder sb = new StringBuilder();
-        while (!stack.isEmpty()) {
-            sb.append(stack.pollLast());  // 바닥에서부터 꺼냄
+        // 출력
+        StringBuilder sb = new StringBuilder();
+        while(!stack.isEmpty()) {
+            sb.append(stack.pop());
         }
-        return sb.toString();
+        
+        return sb.reverse().toString();
     }
 }
