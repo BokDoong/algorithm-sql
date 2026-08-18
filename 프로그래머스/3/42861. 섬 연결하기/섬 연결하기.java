@@ -1,101 +1,55 @@
-import java.io.*;
 import java.util.*;
 
 class Solution {
     
-    public List<List<Integer>> graph = new ArrayList<>();
-    
-    // 0 : 연결O, N : 연결X + 연결되어 있는 노드 수
-    public int checkConnectedOrConnect(int start, int end, int n) {
-        
-        Queue<Integer> queue = new LinkedList<>();
-        queue.add(start);
-        
-        boolean[] visited = new boolean[n];
-        visited[start] = true;
-        
-        while ( !queue.isEmpty() ) {
-            
-            Integer node = queue.poll();
-            
-            for ( Integer connectedNode : graph.get(node) ) {
-                
-                // 연결되어 있는지 확인
-                if ( connectedNode == end ) {
-                    return 0;
-                }
-                
-                // 방문 안헀다면 방문
-                if ( !visited[connectedNode] ) {
-                    visited[connectedNode] = true;
-                    queue.add(connectedNode);
-                }
-                
-            }
-            
-        }
-        
-        // 연결 안되어 있었음
-        // 연결
-        graph.get(start).add(end);
-        graph.get(end).add(start);
-
-        // 최종 연결된 개수 리턴
-        int result = 0;
-        for ( int i = 0 ; i < n ; i++ ) {
-            if ( visited[i] ) {
-                result += 1;
-            }
-        }
-        
-        return result;
-    }
-    
-    public int solve(int n, int[][] costs) {
-        
-        int result = 0;
-        
-        for ( int i = 0 ; i < costs.length ; i++ ) {
-            
-            // 노드, 비용
-            int start = costs[i][0];
-            int end = costs[i][1];
-            int cost = costs[i][2];
-            
-            // 연결되어 있는지 확인
-            int connected = checkConnectedOrConnect(start, end, n);
-            
-            // 이미 연결되어 있으면 넘기기
-            if ( connected == 0 ) {
-                continue;
-            }
-            
-            // 연결 다됐으면 끝
-            result += cost;
-            if ( connected == n ) {
-                return result;
-            }
-            
-        }
-        
-        return result;
-        
-    }
-    
-    public int[][] sortCosts(int[][] costs) {
-        Arrays.sort(costs, Comparator.comparingInt((int[] cost) -> cost[2]));
-        return costs;
-    }
-    
-    public void initialize(int n) {
-        for ( int i = 0 ; i < n ; i++ ) {
-            graph.add(new ArrayList<>());
-        }
-    }
+    int[] parent;
     
     public int solution(int n, int[][] costs) {
-        initialize(n);
-        int[][] sortedCosts = sortCosts(costs);
-        return solve(n, sortedCosts);
+        
+        int answer = 0;
+        parent = new int[n];
+        
+        // 비용순 정렬
+        Arrays.sort(costs, (cost1, cost2) -> cost1[2] - cost2[2]);
+        
+        // 초기화
+        init(n);
+        
+        // 유니온 & 파인드 : 어차피 같은 그룹이면 간선이 안만들어짐
+        int edges = 0;
+        for (int[] cost : costs) {
+            // 간선의 개수가 n-1이 될 때까지 순회
+            if (edges == n-1) break;
+            
+            // 같은 그룹인지 보고 > 아니라면 합치기, 비용 더하기
+            if (union(cost[0], cost[1])) {
+                answer += cost[2];
+                edges++;
+            }
+        }
+        
+        return answer;
+    }
+    
+    void init(int n) {
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;
+        }
+    }
+    
+    int findRoot(int node) {
+        if (parent[node] == node) return node;
+        parent[node] = findRoot(parent[node]);
+        return parent[node];
+    }
+    
+    boolean union(int nodeA, int nodeB) {
+        int rootA = findRoot(nodeA);
+        int rootB = findRoot(nodeB);
+        // 같은 그룹
+        if (rootA == rootB) return false;
+        // 합치기
+        parent[rootA] = rootB;
+        return true;
     }
 }
