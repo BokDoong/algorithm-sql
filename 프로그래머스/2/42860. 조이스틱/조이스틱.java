@@ -1,31 +1,32 @@
+import java.util.*;
+
 class Solution {
     public int solution(String name) {
-        int answer = 0;
-        int n = name.length();
         
-        // 각 자리마다 이동해야 하는 갯수
+        int answer = 0;
+        
+        // 각 자리수
         for (char c : name.toCharArray()) {
             answer += Math.min(c - 'A', 'Z' - c + 1);
         }
         
-        // 이동 방향 선정
-        // 1 : 오른쪽 쭉 이동
-        int move = n - 1;
+        // 쭉 이동
+        int move = name.length() - 1;
         
-        // 모든 꺽는 후보
-        for (int i = 0; i < n; i++) {
-            // A 연속으로 오는 지점 
-            int next = i + 1;
-            while (next < n && name.charAt(next) == 'A') {
-                next++;
+        // 인덱스 하나씩 기준으로
+        for (int i = 0; i < name.length(); i++) {
+            // A가 연속으로 오는 첫 인덱스 찾기
+            int idx = i + 1;
+            while (idx < name.length() && name.charAt(idx) == 'A') {
+                idx++;
             }
             
-            // 오른쪽 i까지 -> 돌아와서 -> 역순 next까지
-            move = Math.min(move, i + i + (n - next));
+            // i까지 -> 역순
+            move = Math.min(move, 2*i + name.length() - idx);
             
-            // next로 역순 -> 다시 돌아와서 i까지
-            move = Math.min(move, (n - next) + (n - next) + i);
-        }
+            // 역순 -> i까지
+            move = Math.min(move, 2*(name.length() - idx) + i);
+        }        
         
         answer += move;
         return answer;
