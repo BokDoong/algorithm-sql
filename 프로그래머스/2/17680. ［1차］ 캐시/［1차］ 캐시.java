@@ -4,42 +4,28 @@ class Solution {
     // 캐시 사이즈 : 30, 도시 크기 : 10만 -> 300만 
     // 이미
     public int solution(int cacheSize, String[] cities) {
-
-        Set<String> cityCaches = new HashSet<>();
-        Map<String, Integer> indexCaches = new HashMap<>();
-        int answer = 0;
         
-        if (cacheSize == 0) return cities.length * 5;
+        // 0개라면 바로 리턴
+        if (cacheSize == 0) return 5 * cities.length;
+        
+        Set<String> cache = new LinkedHashSet<>();
+        int answer = 0;
 
-        for (int i = 0; i < cities.length; i++) {
-          String city = cities[i].toLowerCase();
-          if (cityCaches.contains(city)) {
-            answer++;
-            indexCaches.put(city.toLowerCase(), i);
-          } else {
-            answer += 5;
-            if (cacheSize <= cityCaches.size()) {
-              String key = findLeastRecentlyUsedKey(indexCaches);
-              cityCaches.remove(key);
-              indexCaches.remove(key);
+        for (String city : cities) {
+            city = city.toLowerCase();
+            boolean cacheHit = cache.contains(city);
+            if (cacheHit) {
+                cache.remove(city);
+                cache.add(city);
+                answer++;
             }
-            cityCaches.add(city.toLowerCase());
-            indexCaches.put(city.toLowerCase(), i);
-          }
+            else {
+                if (cache.size() >= cacheSize) cache.remove(cache.iterator().next());
+                cache.add(city);
+                answer += 5;
+            }
         }
 
-        return answer;
-    }
-    
-    String findLeastRecentlyUsedKey(Map<String, Integer> indexCaches) {
-        Integer minValue = Integer.MAX_VALUE;
-        String answer = "";
-        for (String key : indexCaches.keySet()) {
-          if (indexCaches.get(key) < minValue) {
-            minValue = indexCaches.get(key);
-            answer = key;
-          }
-        }
         return answer;
     }
 }
