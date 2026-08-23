@@ -2,107 +2,116 @@ import java.util.*;
 
 class Solution {
     public int[] solution(String[] info, String[] query) {
-        // 능력 key → 점수 리스트
-        Map<String, List<Integer>> abilities = new HashMap<>();
-        for (String in : info) {
-            String[] sp = in.split(" ");
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < 4; i++) sb.append(sp[i].charAt(0));
-            abilities.computeIfAbsent(sb.toString(), k -> new ArrayList<>())
-                     .add(Integer.parseInt(sp[4]));
-        }
-
-        // 이진 탐색을 위해 각 리스트 정렬
-        for (List<Integer> list : abilities.values()) Collections.sort(list);
-
-        // 쿼리: '-'를 확장한 key들 각각에서 target 이상 인원 합산
         int[] answer = new int[query.length];
-        for (int q = 0; q < query.length; q++) {
-            int target = normalizeScore(query[q]);
-            int count = 0;
-            for (String key : normalizeAbility(query[q])) {
-                List<Integer> list = abilities.get(key);
-                if (list == null) continue;
-                count += list.size() - lowerBound(list, target);
+
+        // Map<String(능력), List<점수>>
+        Map<String, List<Integer>> map = initInfos(info);
+
+        // 이분 탐색을 위해 각 점수 리스트 정렬
+        for (String key : map.keySet()) Collections.sort(map.get(key));
+
+        // query 순회 — '-'는 후보 알파벳으로 확장 후 각 key에서 누적
+        for (int i = 0; i < query.length; i++) {
+            String q = query[i];
+            int target = Integer.parseInt(q.split(" ")[7]);
+            int tmpAnswer = 0;
+            for (String key : normalize(q)) {
+                List<Integer> scores = map.get(key);
+                if (scores == null) continue;
+                tmpAnswer += scores.size() - find(scores, target);
             }
-            answer[q] = count;
+            answer[i] = tmpAnswer;
         }
         return answer;
     }
 
-    // java and backend and junior and pizza 100 → [jbjp] / '-'는 후보로 확장
-    private List<String> normalizeAbility(String query) {
-        String[] commands = query.split(" ");
+    // lower bound: target 이상이 처음 나오는 위치
+    private int find(List<Integer> array, int target) {
+        int left = 0;
+        int right = array.size();
+
+        while (left < right) {
+            int mid = (left + right) / 2;
+            if (array.get(mid) < target) left = mid + 1;
+            else right = mid;
+        }
+        return left;
+    }
+
+    // "- and backend and senior and - 150" → 후보 key 목록
+    private List<String> normalize(String q) {
+        String[] splitted = q.split(" ");
         List<String> answer = new ArrayList<>();
 
-        // 개발언어
-        String language = commands[0];
-        if (language.equals("-")) {
-            answer.add("c"); answer.add("j"); answer.add("p");   // cpp, java, python
+        // cpp, java, python, -
+        String skill = splitted[0];
+        if (skill.equals("-")) {
+            answer.add("c");
+            answer.add("j");
+            answer.add("p");
         } else {
-            answer.add(String.valueOf(language.charAt(0)));
+            answer.add(String.valueOf(skill.charAt(0)));
         }
 
-        // 직군
-        String position = commands[2];
-        List<String> next = new ArrayList<>();
-        if (position.equals("-")) {
+        // backend, frontend, -
+        List<String> tmpAnswer = new ArrayList<>();
+        String part = splitted[2];
+        if (part.equals("-")) {
             for (String a : answer) {
-                next.add(a + "b");
-                next.add(a + "f");
-            }
-        } else {
-            for (String a : answer) {
-                next.add(a + position.charAt(0));
-            }
-        }
-        answer = next;
-
-        // 경력
-        String career = commands[4];
-        next = new ArrayList<>();
-        if (career.equals("-")) {
-            for (String a : answer) {
-                next.add(a + "j");
-                next.add(a + "s");
+                tmpAnswer.add(a + "b");
+                tmpAnswer.add(a + "f");
             }
         } else {
             for (String a : answer) {
-                next.add(a + career.charAt(0));
+                tmpAnswer.add(a + part.charAt(0));
             }
         }
-        answer = next;
+        answer = tmpAnswer;
 
-        // 소울푸드
-        String food = commands[6];
-        next = new ArrayList<>();
+        // junior, senior, -
+        tmpAnswer = new ArrayList<>();
+        String grade = splitted[4];
+        if (grade.equals("-")) {
+            for (String a : answer) {
+                tmpAnswer.add(a + "j");
+                tmpAnswer.add(a + "s");
+            }
+        } else {
+            for (String a : answer) {
+                tmpAnswer.add(a + grade.charAt(0));
+            }
+        }
+        answer = tmpAnswer;
+
+        // chicken, pizza, -
+        tmpAnswer = new ArrayList<>();
+        String food = splitted[6];
         if (food.equals("-")) {
             for (String a : answer) {
-                next.add(a + "c");
-                next.add(a + "p");
+                tmpAnswer.add(a + "c");
+                tmpAnswer.add(a + "p");
             }
         } else {
             for (String a : answer) {
-                next.add(a + food.charAt(0));
+                tmpAnswer.add(a + food.charAt(0));
             }
         }
-        answer = next;
+        answer = tmpAnswer;
         return answer;
     }
 
-    private int normalizeScore(String query) {
-        String[] splitted = query.split(" ");
-        return Integer.parseInt(splitted[splitted.length - 1]);
-    }
+    // "java backend junior pizza 150" → 능력 key로 축약해 점수 적재
+    private Map<String, List<Integer>> initInfos(String[] infos) {
+        Map<String, List<Integer>> map = new HashMap<>();
+        for (String info : infos) {
+            String[] splitted = info.split(" ");
 
-    // list에서 target 이상이 처음 나오는 위치 (lower bound)
-    private int lowerBound(List<Integer> list, int target) {
-        int lo = 0, hi = list.size();
-        while (lo < hi) {
-            int mid = (lo + hi) / 2;
-            if (list.get(mid) < target) lo = mid + 1;
-            else hi = mid;
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 4; i++) sb.append(splitted[i].charAt(0));
+
+            map.computeIfAbsent(sb.toString(), k -> new ArrayList<>())
+               .add(Integer.parseInt(splitted[4]));
         }
-        return lo;
+        return map;
     }
 }
