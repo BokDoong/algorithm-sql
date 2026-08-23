@@ -2,42 +2,23 @@ import java.util.*;
 
 class Solution {
     public String[] solution(String[] record) {
+        Map<String, String> nicknames = new HashMap<>();
 
-    // 임시 결과값
-    List<String> tmpAnswers = new ArrayList<>();
-    for (String inputs : record) {
-      String[] input = inputs.split(" ");
-      String command = input[0];
-      if (command.equals("Enter")) tmpAnswers.add(input[1] + "님이 들어왔습니다.");
-      else if (command.equals("Leave")) tmpAnswers.add(input[1] + "님이 나갔습니다.");
-    }
-    
-    // 해시맵 - key: id, value: name
-    HashMap<String, String> names = new HashMap<>();
-    
-    // 넣기
-    for (String inputs : record) {
-      String[] input = inputs.split(" ");
-      String command = input[0];
-      if (command.equals("Enter") || command.equals("Change")) names.put(input[1], input[2]);
-    }
+        // [uid, 메시지 접미사] — 닉네임은 마지막에 최종값으로 결합 (지연 포맷팅)
+        List<String[]> logs = new ArrayList<>();
+        for (String r : record) {
+            String[] splitted = r.split(" ");
+            // Leave가 아니면(Enter, Change) 닉네임 갱신
+            if (!splitted[0].equals("Leave")) nicknames.put(splitted[1], splitted[2]);
+            // Change는 로그를 남기지 않음
+            if (splitted[0].equals("Enter")) logs.add(new String[]{splitted[1], "님이 들어왔습니다."});
+            else if (splitted[0].equals("Leave")) logs.add(new String[]{splitted[1], "님이 나갔습니다."});
+        }
 
-    // 출력
-    List<String> answer = new ArrayList<>();
-    StringBuilder sb = new StringBuilder();
-    for (String tmpAnswer : tmpAnswers) {
-      String[] splitted = tmpAnswer.split("님");
-      sb.append(names.get(splitted[0])).append("님").append(splitted[1]);
-      answer.add(sb.toString());
-      sb = new StringBuilder();
+        List<String> answer = new ArrayList<>();
+        for (String[] log : logs) {
+            answer.add(nicknames.get(log[0]) + log[1]);
+        }
+        return answer.toArray(new String[0]);
     }
-
-    // 디버깅
-    String[] realAnswer = new String[answer.size()];
-    for (int i = 0; i < answer.size(); i++) {
-      realAnswer[i] = answer.get(i);
-    }
-    
-    return realAnswer;
-  }
 }
