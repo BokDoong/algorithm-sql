@@ -2,37 +2,37 @@ import java.util.*;
 
 class Solution {
     public int solution(String s) {
-        
         int answer = s.length();
-        
+
         for (int unit = 1; unit <= s.length() / 2; unit++) {
+            List<String> splitted = split(s, unit);
+
+            String prev = splitted.get(0);
+            int count = 1;
             int tmpAnswer = 0;
-            
-            // 앞에서 부터 unit마다 잘라서 -> 리스트에 넣기
-            List<String> nums = new ArrayList<>();
-            int idx = 0;
-            while (idx < s.length()) {
-                if (idx + unit > s.length()) nums.add(s.substring(idx, s.length()));
-                else nums.add(s.substring(idx, idx+unit));
-                idx += unit;
-            }
-            
-            // 하나씩 돌아가면서 이전이랑 같은지 보기 -> 같다면 count++ -> 다르다면 count가 1이면 그대로, 1보다 크면 1+단위
-            String prev = "";
-            int cnt = 0;
-            for (String num : nums) {
-                if (num.equals(prev)) {
-                    cnt++;
+            for (int i = 1; i < splitted.size(); i++) {
+                if (splitted.get(i).equals(prev)) {
+                    count++;
                 } else {
-                    if (cnt >= 1) tmpAnswer += prev.length() + (cnt > 1 ? String.valueOf(cnt).length() : 0);
-                    prev = num;
-                    cnt = 1;
+                    // 런 정산 — 닫히는 런(prev)의 실제 길이로
+                    tmpAnswer += prev.length() + (count > 1 ? String.valueOf(count).length() : 0);
+                    count = 1;
+                    prev = splitted.get(i);
                 }
             }
-            tmpAnswer += prev.length() + (cnt > 1 ? String.valueOf(cnt).length() : 0);
+            // 마지막 런 정산 (꼬리 조각이면 prev.length()가 unit보다 짧을 수 있음)
+            tmpAnswer += prev.length() + (count > 1 ? String.valueOf(count).length() : 0);
+
             answer = Math.min(answer, tmpAnswer);
         }
-        
+        return answer;
+    }
+
+    private List<String> split(String s, int unit) {
+        List<String> answer = new ArrayList<>();
+        for (int i = 0; i < s.length(); i += unit) {
+            answer.add(s.substring(i, Math.min(i + unit, s.length())));
+        }
         return answer;
     }
 }
