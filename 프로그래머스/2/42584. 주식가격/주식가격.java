@@ -6,35 +6,31 @@ class Solution {
    
     int[] answer = new int[prices.length];
 
-    //  하나씩 스택에 넣는다
-    //  -> Stack<int[]> stack, 0번 : 인덱스 위치, 1번 : 원소
+    // 스택, new
+    // 0번 : val, 1번 : 인덱스
     Deque<int[]> stack = new ArrayDeque<>();
-
     for (int i = 0; i < prices.length; i++) {
-      
-      // 비면 바로 넣고      
-      if (stack.isEmpty()) {
-        stack.push(new int[]{i, prices[i]});
-        continue;
-      }
-      
-      //  top이 나보다 크면 answer의 top 인덱스에 (나의 인덱스 - top의 인덱스) + pop
-      //  top이 나보다 작거나 같을 때까지
-      while (!stack.isEmpty() && stack.peek()[1] > prices[i]) {
-        int[] val = stack.pop();
-        answer[val[0]] = i - val[0];
-      }
-      
-      // 넣고
-      stack.push(new int[]{i, prices[i]});
+        // 비어있으면 끝
+        if (stack.isEmpty()) {
+            stack.push(new int[]{prices[i], i});
+            continue;
+        }
+        // top이 new보다 값이 크다면 answer[top.idx] = (new.idx - top.idx)
+        while (!stack.isEmpty() && stack.peek()[0] > prices[i]) {
+            int[] top = stack.pop();
+            answer[top[1]] = i - top[1];
+        }
+        
+        stack.push(new int[]{prices[i], i});
     }
 
-    //  남아있는 애는 prices.length - 1 - 인덱스
+    // 남아있는 애들 : answer[remains.idx] = (prices.length - remains.idx)
     while (!stack.isEmpty()) {
-      int[] val = stack.pop();
-      answer[val[0]] = prices.length - 1 - val[0];
+        int[] top = stack.pop();
+        answer[top[1]] = prices.length - top[1] - 1;
     }
 
     return answer;
   }
+    
 }
