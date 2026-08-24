@@ -11,16 +11,16 @@ class Solution {
             int count = 1;
             int tmpAnswer = 0;
             for (int i = 1; i < splitted.size(); i++) {
-                if (splitted.get(i).equals(prev)) {
+                if (prev.equals(splitted.get(i))) {
                     count++;
                 } else {
-                    // 런 정산 — 닫히는 런(prev)의 실제 길이로
+                    // 런 정산 — 닫히는 런(prev)의 실제 길이 + 반복 시 자릿수
                     tmpAnswer += prev.length() + (count > 1 ? String.valueOf(count).length() : 0);
                     count = 1;
                     prev = splitted.get(i);
                 }
             }
-            // 마지막 런 정산 (꼬리 조각이면 prev.length()가 unit보다 짧을 수 있음)
+            // 마지막 런 정산
             tmpAnswer += prev.length() + (count > 1 ? String.valueOf(count).length() : 0);
 
             answer = Math.min(answer, tmpAnswer);
@@ -30,9 +30,12 @@ class Solution {
 
     private List<String> split(String s, int unit) {
         List<String> answer = new ArrayList<>();
-        for (int i = 0; i < s.length(); i += unit) {
-            answer.add(s.substring(i, Math.min(i + unit, s.length())));
+        int idx = 0;
+        while (idx + unit <= s.length()) {
+            answer.add(s.substring(idx, idx + unit));
+            idx += unit;
         }
+        if (idx < s.length()) answer.add(s.substring(idx));
         return answer;
     }
 }
