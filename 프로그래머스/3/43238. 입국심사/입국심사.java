@@ -1,58 +1,33 @@
-import java.io.*;
 import java.util.*;
 
 class Solution {
-    
-    public long binarySearch(long maxTime, int[] times, int n) {
+    public long solution(int n, int[] times) {
         
+        Arrays.sort(times);
+        
+        // 느린 사람이 다 처리 
         long left = 0;
-        long right = maxTime;
-        long targetTime = ( left + right ) / 2;
+        long right = (long) times[times.length - 1] * n;
         
-        while ( left < right ) {
+        // 이분탐색
+        while (left < right) {
+            long mid = (left + right) / 2;
             
-            targetTime = ( left + right ) / 2;
-            long judges = calculateJudgeHuman(times, targetTime);
+            // 합 구하기
+            long total = 0;
+            for (int time : times) {
+                total += mid/time;
+            }
             
-            if ( judges < n ) {
-                left = targetTime + 1;
+            // 이동
+            if (total >= n) {
+                right = mid;
             } else {
-                right = targetTime;
+                left = mid + 1;
             }
             
         }
         
-        return left; 
-        
+        return left;
     }
-    
-    public int calculateLongestTime(int[] times) {
-        
-        int result = -1;
-        
-        for ( int i = 0 ; i < times.length ; i++ ) {
-            result = Math.max(result, times[i]);
-        }
-        
-        return result;
-        
-    }
-    
-    public long calculateJudgeHuman(int[] times, long targetTime) {
-        
-        long judge = 0;
-        
-        for ( int i = 0 ; i < times.length ; i++ ) {
-            judge += (long)(targetTime / times[i]);
-        }
-        
-        return judge;
-        
-    }
-    
-    public long solution(int n, int[] times) {
-        long maxTime = calculateLongestTime(times) * (long) n;
-        return binarySearch(maxTime, times, n);
-    }
-    
 }
