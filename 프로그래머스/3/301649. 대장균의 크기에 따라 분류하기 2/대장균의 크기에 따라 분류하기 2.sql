@@ -1,12 +1,11 @@
-SELECT ID, 
-    CASE
-        WHEN ( SIZE_RANK <= (SELECT COUNT(*)*0.25 FROM ECOLI_DATA) ) THEN 'CRITICAL'
-        WHEN ( SIZE_RANK <= (SELECT COUNT(*)*0.50 FROM ECOLI_DATA) ) THEN 'HIGH'
-        WHEN ( SIZE_RANK <= (SELECT COUNT(*)*0.75 FROM ECOLI_DATA) ) THEN 'MEDIUM'
-        ELSE 'LOW'
-    END AS COLONY_NAME
-FROM (
-    SELECT ID, RANK() OVER (ORDER BY SIZE_OF_COLONY DESC) AS SIZE_RANK
-    FROM ECOLI_DATA
-) AS ECOLI_RANK
-ORDER BY ID
+-- 코드를 작성해주세요
+select 
+    ID,
+    case 
+        when percent_rank() over (order by SIZE_OF_COLONY desc) <= 0.25 then 'CRITICAL'
+        when percent_rank() over (order by SIZE_OF_COLONY desc) <= 0.50 then 'HIGH'
+        when percent_rank() over (order by SIZE_OF_COLONY desc) <= 0.75 then 'MEDIUM'
+        else 'LOW'
+    end as COLONY_NAME
+from ECOLI_DATA
+order by ID
