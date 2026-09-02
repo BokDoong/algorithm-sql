@@ -2,49 +2,44 @@ import java.util.*;
 
 class Solution {
     
-    int[] parent;
+    // 부모 노드 정보
+    int[] parents;
     
     public int solution(int n, int[][] costs) {
         
-        // 정렬
-        Arrays.sort(costs, (cost1, cost2) -> cost1[2] - cost2[2]);
-        
-        // 초기화
-        parent = new int[n];
+        // 부모 노드
+        parents = new int[n];
         for (int i = 0; i < n; i++) {
-            parent[i] = i;
+            parents[i] = i;
         }
         
-        // union-find
-        int answer = 0;
-        int v = 0;
-        for (int[] cost : costs) {
-            // 간선이 n-1개 될 때까지 합치기
-            if (v == n-1) break;
-            // 같은 그룹이면 합쳐지지 않음
-            if (union(cost[0], cost[1])) {
-                v++;
-                answer += cost[2];
+        // 비용 기준으로 정렬: 최대한 낮은 비용인 애들부터 갖고오기 위해
+        // 두 노드가 그룹이 되면 앞으로 해당 노드가 나오면 볼 필요가 없음
+        Arrays.sort(costs, (a, b) -> a[2] - b[2]);
+        
+        int answer = 0, picked = 0;
+        for (int[] e : costs) {
+            // 다른 그룹이면 합치고 더함
+            // 같은 그룹이면 이미 최소 비용을 알기 떄문에 알 필요가 없음.
+            if (find(e[0]) != find(e[1])) {
+                union(e[0], e[1]);
+                answer += e[2];
+                picked++;
+                if (picked == n-1) break;
             }
         }
         
         return answer;
     }
     
-    boolean union(int nodeA, int nodeB) {
-        int rootA = findRoot(nodeA);
-        int rootB = findRoot(nodeB);
-        if (rootA != rootB) {
-            parent[rootA] = rootB; 
-            return true;
-        }
-        return false;
+    // 부모 찾기
+    int find(int node) {
+        if (parents[node] == node) return node;
+        return find(parents[node]);
     }
     
-    int findRoot(int node) {
-        if (parent[node] == node) return node;
-        parent[node] = findRoot(parent[node]);
-        return parent[node];
+    // 합치기
+    void union(int node1, int node2) {
+        parents[find(node2)] = find(node1);
     }
-    
 }
