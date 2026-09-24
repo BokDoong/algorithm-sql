@@ -2,18 +2,8 @@
 
 using namespace std;
 
-// 방향
-
-// 큐 : (x, y, 이동거리)
-
-// 4 방향 : 못가면 pass
-// 쭉이동
-// - 도착하면 끝
-// - 이미 값이 있다면 패스 
-// - 큐에 넣기
-
 bool canGo(vector<string>& board, int h, int w, int x, int y) {
-    return (0 <= x && 0 <= y && x < h && y < w && board[x][y] != 'D');
+    return 0 <= x && x < h && 0 <= y && y < w && board[x][y] != 'D';
 }
 
 int solution(vector<string> board) {
@@ -27,8 +17,8 @@ int solution(vector<string> board) {
     queue<tuple<int, int, int>> queue;
     vector<vector<bool>> visited(h, vector<bool>(w, false));
     
-    // 도착지
-    int targetX = -1; int targetY = -1;
+    int targetX = -1;
+    int targetY = -1;
     for (int x = 0; x < h; x++) {
         for (int y = 0; y < w; y++) {
             if (board[x][y] == 'G') { targetX = x; targetY = y; }
@@ -36,32 +26,23 @@ int solution(vector<string> board) {
         }
     }
     
-    // 4 방향 : 못가면 pass
-    // 쭉이동
-    // - 도착하면 끝
-    // - 큐에 넣기
     while (!queue.empty()) {
         auto [cx, cy, dist] = queue.front();
         queue.pop();
         
-        for (int i = 0; i < 4; i++) {    
+        for (int i = 0; i < 4; i++) {
             int nodeX = cx;
             int nodeY = cy;
             
-            // 쭉 이동
             while (canGo(board, h, w, nodeX + dx[i], nodeY + dy[i])) {
-                nodeX = nodeX + dx[i];
-                nodeY = nodeY + dy[i];
+                nodeX += dx[i];
+                nodeY += dy[i];
             }
             
-            // 도착하면 끝
-            if (nodeX == targetX && nodeY == targetY) return dist+1;
+            if (nodeX == targetX && nodeY == targetY) return dist + 1;
             
-            // 이미 방문하면 패스
             if (visited[nodeX][nodeY]) continue;
             visited[nodeX][nodeY] = true;
-            
-            // 큐에 넣기
             queue.push({nodeX, nodeY, dist + 1});
         }
     }
