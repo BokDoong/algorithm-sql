@@ -2,67 +2,71 @@
 
 using namespace std;
 
-int maxDiff;
-vector<int> answer;
-vector<int> lion;
-bool flag;
+// 아예 안맞추거나 어피치보다 하나 더 맞춰야함
 
-// 차이 계산 : 0이면 진거임
-int calculate(vector<int>& aPeach) {
-    int l = 0, a = 0;
-    for (int i = 0; i < 11; i++) {
-        if (aPeach[i] == 0 && lion[i] == 0) continue;
-        if (lion[i] > aPeach[i]) l += (10 - i);
-        else a += (10 - i);
+// maxDiff, result
+int maxDiff = -1;
+vector<int> result;
+
+// 음수이면 어피치가 더 큰 것임.
+int calculateDiff(vector<int>& lion, vector<int>& apeach) {
+    int answer = 0;
+    for (int i = 0; i < 10; i++) {
+        if (lion[i] == 0 && apeach[i] == 0) continue;
+        if (apeach[i] < lion[i]) answer += 10 - i;
+        else answer -= 10 - i;;
     }
-    return l - a;
+    return answer;
 }
 
-// idx 끝이거나, n개에 다다르면 끝
-// idx 순회하며 0 or apeach[idx]++
-void backTracking(vector<int>& aPeach, int idx, int nowN, int n) {
+
+// 백트래킹
+void backTracking(vector<int>& lion, vector<int>& apeach, int n, int depth) {
     
-    if (idx == 10 || nowN == n) {
-        lion[10] = n - nowN;
-        int diff = calculate(aPeach);
-        if (diff > 0) {
-            if (diff > maxDiff) {
-                flag = true;
-                maxDiff = diff;
-                answer = lion;
-            } else if (diff == maxDiff) {
-                for (int i = 10; i > -1; i--) {
-                    if (answer[i] < lion[i]) {
-                        answer = lion;
-                        break;
-                    }
-                    if (answer[i] > lion[i]) break;
-                }
+    // 끝
+    if (depth == 10) {
+        lion[10] = n;
+        int diff = calculateDiff(lion, apeach);
+        if (diff <= 0) {
+            lion[10] = 0;
+            return;
+        }
+        
+        // - depth가 10이라면 diff 비교
+        //   - maxDiff < diff: maxDiff 갱신, result 갱신
+        //   - maxDiff == diff: result 역순으로 큰 것으로 갱신
+        //   - maxDiff > diff: 끝
+        if (diff > maxDiff) {
+            maxDiff = diff;
+            result = lion;
+        } else if (diff == maxDiff) {
+            for (int i = 10; i >= 0; i--) {
+                if (lion[i] > result[i]) { result = lion; break; }
+                if (lion[i] < result[i]) break;
             }
         }
         lion[10] = 0;
         return;
     }
     
-    backTracking(aPeach, idx+1, nowN, n);
-    if (aPeach[idx] + 1 + nowN <= n) {
-        lion[idx] = aPeach[idx]+1;
-        backTracking(aPeach, idx+1, aPeach[idx] + 1 + nowN, n);
-        lion[idx] = 0;
+    // - 백트래킹
+    //   - 0으로
+    //   - 어피치+1 > 백트래킹 > 0 복귀
+    backTracking(lion, apeach, n, depth+1);
+    if (n >= apeach[depth] + 1) {
+        lion[depth] = apeach[depth] + 1;
+        backTracking(lion, apeach, n - (apeach[depth] + 1), depth+1);  // 이렇게
+        lion[depth] = 0;
     }
 }
 
 vector<int> solution(int n, vector<int> info) {
-    answer.clear();
     maxDiff = -1;
-    
-    lion.assign(11, 0);
-    flag = false;
-    backTracking(info, 0, 0, n);
-    
-    if (flag) {
-        return answer;
-    } else {
-        return {-1};
-    }
+    result.clear();
+    result.assign(11, 0); 
+    vector<int> lion(11, 0);
+    backTracking(lion, info, n, 0);
+    for (int i = 0; i < 11; i++) cout << result[i] << " ";
+    if (maxDiff == -1) return {-1};
+    return result;
 }
